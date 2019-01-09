@@ -46,3 +46,21 @@ kable(head(cells))
 write.csv(cells, "./output/summary_non_patient_samples.csv", row.names = F)
 ```
 
+
+## Investigate MDS-L experiments 
+> Jeremy's suggestion of most useful to our lab
+> Focus on triplicate experiment: MDS-L + DMSO vs. Len & MDS-L-Runx1-KO + DMSO vs. Len
+
+```{r}
+int <- filter(cells, patient_external_id == "MDS-L" & grepl(x = cells$meta, pattern = "human"))
+
+kable(int)
+```
+
+> Hypothesis:
+* Loss of Runx1 reduces Lenalidomide (Len) sensitivity of MDS-L cell line by altering the gene expression response to Len.
+
+> Aims:
+* To identify Len-responsive genes: i.e. differentially expressed DMSO vs. Len in parental MDS-L cell line.
+* To identify Runx1-dependent genes: i.e. differentially expressed in Len-treated MDS-L vs. KO (perhaps normalize to DMSO condition in both cell lines?)
+
