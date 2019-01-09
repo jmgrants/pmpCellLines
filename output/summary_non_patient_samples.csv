@@ -1,0 +1,116 @@
+"patient_external_id","specimen_external_id","meta","is_patient"
+"AML-193","AML-193",NA,FALSE
+"AML-193","AML193",NA,FALSE
+"GM12878","GM12878",NA,FALSE
+"GM19240","GM19240",NA,FALSE
+"HMC-1","HMC-1",NA,FALSE
+"K562","K562",NA,FALSE
+"KASUMI-6","KASUMI-6",NA,FALSE
+"KCL-22","KCL-22",NA,FALSE
+"KG-1","KG-1",NA,FALSE
+"KG-1a","KG-1a",NA,FALSE
+"KG-1a","KG-1a shRUNX1 #3658 DMSO 7day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"KG-1a","KG-1a shRUNX1 #3660 DMSO 7day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"KG-1a","KG-1a shRUNX1 #3660 Len 1uM 7day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"LoD-A1","LoD-A1",NA,FALSE
+"LoD-A2","LoD-A2",NA,FALSE
+"LoD-A3","LoD-A3",NA,FALSE
+"LoD-A4","LoD-A4",NA,FALSE
+"LoD-A5","LoD-A5",NA,FALSE
+"LoD-A6","LoD-A6",NA,FALSE
+"LoD-B1","LoD-B1",NA,FALSE
+"LoD-B2","LoD-B2",NA,FALSE
+"LoD-B3","LoD-B3",NA,FALSE
+"LoD-B4","LoD-B4",NA,FALSE
+"LoD-B5","LoD-B5",NA,FALSE
+"LoD-B6","LoD-B6",NA,FALSE
+"LoD-C1","LoD-C1",NA,FALSE
+"LoD-C2","LoD-C2",NA,FALSE
+"LoD-C3","LoD-C3",NA,FALSE
+"LoD-C4","LoD-C4",NA,FALSE
+"LoD-C5","LoD-C5",NA,FALSE
+"M07e","M07e",NA,FALSE
+"MDS-L","MDS-L",NA,FALSE
+"MDS-L","MDS-L shSCR DMSO 4day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MDS-L","MDS-L DMSO 4day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MDS-L","MDS-L shSCR Len 1uM 4day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MDS-L","MDS-L Len 1uM 4day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MDS-L","MDS-L shSCR","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MDS-L","MDS-L shRUNX1 #3660","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MDS-L","MDS-L shCRBN #139 DMSO 4day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MDS-L","MDS-L shCRBN #139 Len 1uM 4day","{""comment"": ""Sergio Martinez-Hoyer RUNX1 shRNA experiment""}",FALSE
+"MN1+ND13","MN1+ND13",NA,FALSE
+"MOLM-13","MOLM-13",NA,FALSE
+"NA12878","NA12878",NA,FALSE
+"ND13","ND13",NA,FALSE
+"OCI-AML3","OCI-AML3",NA,FALSE
+"OCI-AML3","AML3 shScramble",NA,FALSE
+"OCI-AML3","AML3 shFBXO11 no7",NA,FALSE
+"OCI-AML3","AML3 shFBXO11 no9",NA,FALSE
+"OCI-AML-5","OCI-AML-5",NA,FALSE
+"OCI-AML-5","AML5",NA,FALSE
+"SET-2","SET-2",NA,FALSE
+"TF-1","TF-1",NA,FALSE
+"THP-1","THP-1",NA,FALSE
+"UT-7","UT-7",NA,FALSE
+"293-FLT3#1","293-FLT3#1",NA,FALSE
+"293-FLT3#3","293-FLT3#3",NA,FALSE
+"HEK293-WT","WT",NA,FALSE
+"HEK293-ITD1","ITD1",NA,FALSE
+"HEK293-ITD2","ITD2",NA,FALSE
+"HEK293-ITD3","ITD3",NA,FALSE
+"HEK293-ITD4","ITD4",NA,FALSE
+"HEK293-ITD5","ITD5",NA,FALSE
+"Kasumi-6/NA12878rep1","Kasumi-6/NA12878rep1",NA,FALSE
+"Kasumi-6/NA12878rep2","Kasumi-6/NA12878rep2",NA,FALSE
+"Kasumi-6/NA12878rep3","Kasumi-6/NA12878rep3",NA,FALSE
+"Kasumi-6/NA12878rep4","Kasumi-6/NA12878rep4",NA,FALSE
+"AK14-AML-01/NA12878","AK14-AML-01/NA12878",NA,FALSE
+"AK14-AML-02/NA12878","AK14-AML-02/NA12878",NA,FALSE
+"AK14-AML-03/NA12878","AK14-AML-03/NA12878",NA,FALSE
+"84-02/NA12878","84-02/NA12878",NA,FALSE
+"GM19240","GM19240E",NA,FALSE
+"KCL-22","KCL",NA,FALSE
+"MDS-L","MDSL[DS]",NA,FALSE
+"AK13-UNK-01","2E",NA,FALSE
+"MIG","MIG-1","{""description"": ""Rawa Ibrahim mouse bone marrow cells. Biological replicate 1 of vector control""}",FALSE
+"MIG","MIG-2","{""description"": ""Rawa Ibrahim mouse bone marrow cells. Biological replicate 2 of vector control""}",FALSE
+"MIG","MIG-3","{""description"": ""Rawa Ibrahim mouse bone marrow cells. Biological replicate 3 of vector control""}",FALSE
+"TIRAP","TIRAP-1","{""description"": ""Rawa Ibrahim mouse bone marrow cells. Biological replicate 1 of TIRAP-overexpressing experimental group""}",FALSE
+"TIRAP","TIRAP-2","{""description"": ""Rawa Ibrahim mouse bone marrow cells. Biological replicate 2 of TIRAP-overexpressing experimental group""}",FALSE
+"TIRAP","TIRAP-3","{""description"": ""Rawa Ibrahim mouse bone marrow cells. Biological replicate 3 of TIRAP-overexpressing experimental group""}",FALSE
+"OCI-AML3","OCI-AML3_shSCR-1","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 1 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#9-1","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 1 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#10-1","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 1 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shSCR-2","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 2 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#9-2","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 2 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#10-2","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 2 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shSCR-3","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 3 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#9-3","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 3 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#10-3","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 3 of 3.""}",FALSE
+"MDS-L","MDSL_DMSO1","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with DMSO control. Replicate 1 of 3.""}",FALSE
+"MDS-L","MDSL_LEN1","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with lenalidomide. Replicate 1 of 3.""}",FALSE
+"MDS-L","KO_DMSO1","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with DMSO control. Replicate 1 of 3.""}",FALSE
+"MDS-L","KO_LEN1","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with lenalidomide. Replicate 1 of 3.""}",FALSE
+"MDS-L","MDSL_DMSO2","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with DMSO control. Replicate 2 of 3.""}",FALSE
+"MDS-L","MDSL_LEN2","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with lenalidomide. Replicate 2 of 3.""}",FALSE
+"MDS-L","KO_DMSO2","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with DMSO control. Replicate 2 of 3.""}",FALSE
+"MDS-L","KO_LEN2","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with lenalidomide. Replicate 2 of 3.""}",FALSE
+"MDS-L","MDSL_DMSO3","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with DMSO control. Replicate 3 of 3.""}",FALSE
+"MDS-L","MDSL_LEN3","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with lenalidomide. Replicate 3 of 3.""}",FALSE
+"MDS-L","KO_DMSO3","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with DMSO control. Replicate 3 of 3.""}",FALSE
+"MDS-L","KO_LEN3","{""description"": ""Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with lenalidomide. Replicate 3 of 3.""}",FALSE
+"UT-7","UT-7-GFP1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition GFP, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-GFP2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition GFP, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-GFP3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition GFP, replicate 3 of 3""}",FALSE
+"UT-7","UT-7-OR-SPG1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition Original Sponge, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-OR-SPG2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition Original Sponge, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-OR-SPG3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition Original Sponge, replicate 3 of 3""}",FALSE
+"UT-7","UT-7-143fixSPG1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-143fixed sponge, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-143fixSPG2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-143fixed sponge, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-143fixSPG3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-143fixed sponge, replicate 3 of 3""}",FALSE
+"UT-7","UT-7-XfixSPG1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-Xfixed sponge, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-XfixSPG2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-Xfixed sponge, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-XfixSPG3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-Xfixed sponge, replicate 3 of 3""}",FALSE
+"XJ005","XJ005",NA,FALSE
+"XJ006","XJ006",NA,FALSE
