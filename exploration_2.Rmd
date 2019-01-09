@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 ```{r, include = FALSE}
 library(tidyverse)
 library(amlpmpdata)
+library(knitr)
 ```
 
 
@@ -30,13 +31,15 @@ pt_meta <- amlpmpdata::db_patients
 
 specimens$is_patient <- pt_meta[match(specimens$patient_external_id, pt_meta$external_id),]$is_patient
 
-head(specimens)
+kable(head(specimens))
 ```
+
+
 
 ```{r filter_out_pt}
 cells <- specimens[which(specimens$is_patient == F),]
 
-head(cells)
+kable(head(cells))
 ```
 
 ```{r}
