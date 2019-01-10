@@ -18,8 +18,13 @@ library(tidyverse)
 
 ## Load saved data
 `exprs` is mRNA-seq TPM values, `libs` is metadata
-```{r}
+```{r load_saved}
 load("expr.RData")
 load("libs.RData")
+```
+
+## Exploratory analysis
+```{r exploratory}
+
 ```
 
