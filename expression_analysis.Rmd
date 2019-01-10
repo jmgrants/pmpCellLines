@@ -14,17 +14,77 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 
 ```{r include=FALSE}
 library(tidyverse)
+library(knitr)
+library(pheatmap)
+library(DESeq2)
 ```
 
 ## Load saved data
-`exprs` is mRNA-seq TPM values, `libs` is metadata
+`expr` is mRNA-seq TPM values, `libs` is metadata
 ```{r load_saved}
 load("expr.RData")
 load("libs.RData")
 ```
 
-## Exploratory analysis
-```{r exploratory}
+```{r add_design_factors}
+libs$Genotype <- ifelse(grepl(pattern = "MDSL", x = libs$specimen_subset_external_id), yes = "WT", no = "Runx1KO")
+libs$Treatment <- ifelse(grepl(pattern = "LEN", x = libs$specimen_subset_external_id), yes = "Len", no = "Ctrl")
 
+libs$Genotype <- factor(libs$Genotype, levels = c("WT", "Runx1KO"))
+libs$Treatment <- factor(libs$Treatment, levels = c("Ctrl", "Len"))
 ```
+
+
+```{r prev_libs}
+kable(libs)
+```
+
+
+## Perform DEseq2 analysis to identify differentially expressed genes in WT+Ctrl vs WT+Len only
+```{r deseq_setup}
+expr.wt <- expr[, which(colnames(expr) %in% c(libs[which(libs$Genotype == "WT"),]$library_name, "Name"))]
+
+counts <- column_to_rownames(expr.wt, var = "Name") %>% apply(1:2, round) # count values must be non-negative integers for DESeq Dataset
+
+cols <- select(libs, library_name, specimen_subset_external_id, Genotype, Treatment) %>%
+  filter(Genotype == "WT")
+```
+
+```{r check_library_names}
+identical(colnames(counts), cols$library_name)
+```
+
+
+```{r dds_setup}
+dds <- DESeqDataSetFromMatrix(countData = counts, colData = cols, design = ~Treatment)
+```
+
+Run DEseq:
+```{r deseq_result, eval=FALSE}
+# this chunk takes a long time to run; don't run it unless you update something
+result <- DESeq(dds)
+
+save(result, file = "deseqResult.RData")
+```
+
+```{r load_deseq_result}
+load("deseq.result.RData")
+```
+
+Run DEseq final result table:
+```{r deseq_stats}
+deseq.table  <- results(result)
+
+deseq.table <- as.tibble(deseq.table) %>%
+  rownames_to_column("gene_id") %>%
+  na.omit()
+
+range(deseq.table$log2FoldChange)
+```
+
+
+
+
+
+
 
