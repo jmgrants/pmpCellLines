@@ -57,10 +57,49 @@ int <- filter(cells, patient_external_id == "MDS-L" & grepl(x = cells$meta, patt
 kable(int)
 ```
 
+```{r}
+write.csv(int, "./output/summary_MDSL_triplicate.csv", row.names = F)
+```
+
+
 > Hypothesis:
 * Loss of Runx1 reduces Lenalidomide (Len) sensitivity of MDS-L cell line by altering the gene expression response to Len.
 
 > Aims:
 * To identify Len-responsive genes: i.e. differentially expressed DMSO vs. Len in parental MDS-L cell line.
 * To identify Runx1-dependent genes: i.e. differentially expressed in Len-treated MDS-L vs. KO (perhaps normalize to DMSO condition in both cell lines?)
+
+
+## Access expression data for samples of interest
+```{r}
+libs <- amlpmpdata::db_libraries[match(int$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),]
+```
+
+For example of how to retrieve expr data tables (by M. Shadbolt: merged all expr files into 1 table), see:
+file://isaac/klabanalysis/mshadbolt/KARSANBIO-1352_Karsan_Lab_Informatics_Support/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval/report/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval.html
+
+```{r}
+mrnas <- read_tsv("/projects/karsanlab/PMP-AML/expression/bcbio_fastrnaseq_salmon/salmon_AML_PMP_expression_output.tsv")
+```
+
+```{r}
+kable(mrnas[1:5, 1:5])
+```
+
+
+#### Select only libraries of interest
+```{r}
+Name <- mrnas$Name
+expr <- mrnas[, match(libs$library_name, colnames(mrnas))]
+expr$Name <- Name
+expr <- select(expr, Name, everything())
+
+kable(head(expr))
+```
+
+
+
+
+
+
 
