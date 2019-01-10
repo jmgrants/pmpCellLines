@@ -68,7 +68,7 @@ save(result, file = "deseqResult.RData")
 ```
 
 ```{r load_deseq_result}
-load("deseq.result.RData")
+load("deseqResult.RData")
 ```
 
 Run DEseq final result table:
