@@ -5,6 +5,7 @@ date: "1/8/2019"
 output:
   html_document:
     keep_md: true
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -42,53 +43,57 @@ cells <- specimens[which(specimens$is_patient == F),]
 kable(head(cells))
 ```
 
-```{r}
+```{r summary_non_pt}
 write.csv(cells, "./output/summary_non_patient_samples.csv", row.names = F)
 ```
 
 
 ## Investigate MDS-L experiments 
-> Jeremy's suggestion of most useful to our lab
+> Jeremy's suggestion of most useful to our lab  
 > Focus on triplicate experiment: MDS-L + DMSO vs. Len & MDS-L-Runx1-KO + DMSO vs. Len
 
-```{r}
+```{r mdsl_samples}
 int <- filter(cells, patient_external_id == "MDS-L" & grepl(x = cells$meta, pattern = "human"))
 
 kable(int)
 ```
 
-```{r}
+```{r summary_mdsl}
 write.csv(int, "./output/summary_MDSL_triplicate.csv", row.names = F)
 ```
 
 
-> Hypothesis:
+> Hypothesis:  
+
 * Loss of Runx1 reduces Lenalidomide (Len) sensitivity of MDS-L cell line by altering the gene expression response to Len.
 
-> Aims:
-* To identify Len-responsive genes: i.e. differentially expressed DMSO vs. Len in parental MDS-L cell line.
+> Aims:  
+
+* To identify Len-responsive genes: i.e. differentially expressed DMSO vs. Len in parental MDS-L cell line.  
 * To identify Runx1-dependent genes: i.e. differentially expressed in Len-treated MDS-L vs. KO (perhaps normalize to DMSO condition in both cell lines?)
 
 
 ## Access expression data for samples of interest
-```{r}
+```{r find_libs}
 libs <- amlpmpdata::db_libraries[match(int$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),]
 ```
 
-For example of how to retrieve expr data tables (by M. Shadbolt: merged all expr files into 1 table), see:
+How to retrieve expr data tables:
+We can find all mRNA expression analysis files by querying the db_paths table. This gives a separate file for each sample. MShadbolt wrote a python script to join all these files and create one big tsv containing **tpm counts** that can be loaded as follows:
+
 file://isaac/klabanalysis/mshadbolt/KARSANBIO-1352_Karsan_Lab_Informatics_Support/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval/report/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval.html
 
-```{r}
+```{r load_mrna}
 mrnas <- read_tsv("/projects/karsanlab/PMP-AML/expression/bcbio_fastrnaseq_salmon/salmon_AML_PMP_expression_output.tsv")
 ```
 
-```{r}
+```{r prev_mrna}
 kable(mrnas[1:5, 1:5])
 ```
 
 
 #### Select only libraries of interest
-```{r}
+```{r libs_of_int_mrna}
 Name <- mrnas$Name
 expr <- mrnas[, match(libs$library_name, colnames(mrnas))]
 expr$Name <- Name
@@ -99,7 +104,11 @@ kable(head(expr))
 
 
 
-
+## Save Rdata files for downstream analysis
+```{r}
+save(expr, file = "expr.RData")
+save(libs, file = "libs.RData")
+```
 
 
 

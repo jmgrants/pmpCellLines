@@ -122,6 +122,13 @@ $(document).ready(function () {
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#load-specimen-list-and-identify-cell-lines-samples-of-interest">Load specimen list and identify cell lines samples of interest</a></li>
+<li><a href="#investigate-mds-l-experiments">Investigate MDS-L experiments</a></li>
+<li><a href="#access-expression-data-for-samples-of-interest">Access expression data for samples of interest</a></li>
+</ul>
+</div>
 
 <div id="load-specimen-list-and-identify-cell-lines-samples-of-interest" class="section level2">
 <h2>Load specimen list and identify cell lines samples of interest</h2>
@@ -131,29 +138,398 @@ $(document).ready(function () {
 
 specimens$is_patient &lt;- pt_meta[match(specimens$patient_external_id, pt_meta$external_id),]$is_patient
 
-head(specimens)</code></pre>
-<pre><code>## # A tibble: 6 x 4
-##   patient_external_id specimen_external_id meta  is_patient
-##   &lt;chr&gt;               &lt;chr&gt;                &lt;chr&gt; &lt;lgl&gt;     
-## 1 05-53               B31920               &lt;NA&gt;  TRUE      
-## 2 100-20              B15881               &lt;NA&gt;  TRUE      
-## 3 101-64              101-64_sample        &lt;NA&gt;  TRUE      
-## 4 102-23              B16360               &lt;NA&gt;  TRUE      
-## 5 102-88              U12888               &lt;NA&gt;  TRUE      
-## 6 103-56              U12943               &lt;NA&gt;  TRUE</code></pre>
+kable(head(specimens))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">patient_external_id</th>
+<th align="left">specimen_external_id</th>
+<th align="left">meta</th>
+<th align="left">is_patient</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">05-53</td>
+<td align="left">B31920</td>
+<td align="left">NA</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">100-20</td>
+<td align="left">B15881</td>
+<td align="left">NA</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">101-64</td>
+<td align="left">101-64_sample</td>
+<td align="left">NA</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">102-23</td>
+<td align="left">B16360</td>
+<td align="left">NA</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="left">102-88</td>
+<td align="left">U12888</td>
+<td align="left">NA</td>
+<td align="left">TRUE</td>
+</tr>
+<tr class="even">
+<td align="left">103-56</td>
+<td align="left">U12943</td>
+<td align="left">NA</td>
+<td align="left">TRUE</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>cells &lt;- specimens[which(specimens$is_patient == F),]
 
-head(cells)</code></pre>
-<pre><code>## # A tibble: 6 x 4
-##   patient_external_id specimen_external_id meta  is_patient
-##   &lt;chr&gt;               &lt;chr&gt;                &lt;chr&gt; &lt;lgl&gt;     
-## 1 AML-193             AML-193              &lt;NA&gt;  FALSE     
-## 2 AML-193             AML193               &lt;NA&gt;  FALSE     
-## 3 GM12878             GM12878              &lt;NA&gt;  FALSE     
-## 4 GM19240             GM19240              &lt;NA&gt;  FALSE     
-## 5 HMC-1               HMC-1                &lt;NA&gt;  FALSE     
-## 6 K562                K562                 &lt;NA&gt;  FALSE</code></pre>
+kable(head(cells))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">patient_external_id</th>
+<th align="left">specimen_external_id</th>
+<th align="left">meta</th>
+<th align="left">is_patient</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">AML-193</td>
+<td align="left">AML-193</td>
+<td align="left">NA</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">AML-193</td>
+<td align="left">AML193</td>
+<td align="left">NA</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">GM12878</td>
+<td align="left">GM12878</td>
+<td align="left">NA</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">GM19240</td>
+<td align="left">GM19240</td>
+<td align="left">NA</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">HMC-1</td>
+<td align="left">HMC-1</td>
+<td align="left">NA</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">K562</td>
+<td align="left">K562</td>
+<td align="left">NA</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
 <pre class="r"><code>write.csv(cells, &quot;./output/summary_non_patient_samples.csv&quot;, row.names = F)</code></pre>
+</div>
+<div id="investigate-mds-l-experiments" class="section level2">
+<h2>Investigate MDS-L experiments</h2>
+<blockquote>
+<p>Jeremy’s suggestion of most useful to our lab<br />
+Focus on triplicate experiment: MDS-L + DMSO vs. Len &amp; MDS-L-Runx1-KO + DMSO vs. Len</p>
+</blockquote>
+<pre class="r"><code>int &lt;- filter(cells, patient_external_id == &quot;MDS-L&quot; &amp; grepl(x = cells$meta, pattern = &quot;human&quot;))
+
+kable(int)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">patient_external_id</th>
+<th align="left">specimen_external_id</th>
+<th align="left">meta</th>
+<th align="left">is_patient</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">MDS-L</td>
+<td align="left">MDSL_DMSO1</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with DMSO control. Replicate 1 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">MDS-L</td>
+<td align="left">MDSL_LEN1</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with lenalidomide. Replicate 1 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">MDS-L</td>
+<td align="left">KO_DMSO1</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with DMSO control. Replicate 1 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">MDS-L</td>
+<td align="left">KO_LEN1</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with lenalidomide. Replicate 1 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">MDS-L</td>
+<td align="left">MDSL_DMSO2</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with DMSO control. Replicate 2 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">MDS-L</td>
+<td align="left">MDSL_LEN2</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with lenalidomide. Replicate 2 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">MDS-L</td>
+<td align="left">KO_DMSO2</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with DMSO control. Replicate 2 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">MDS-L</td>
+<td align="left">KO_LEN2</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with lenalidomide. Replicate 2 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">MDS-L</td>
+<td align="left">MDSL_DMSO3</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with DMSO control. Replicate 3 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">MDS-L</td>
+<td align="left">MDSL_LEN3</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, parental cell line stimulated with lenalidomide. Replicate 3 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">MDS-L</td>
+<td align="left">KO_DMSO3</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with DMSO control. Replicate 3 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">MDS-L</td>
+<td align="left">KO_LEN3</td>
+<td align="left">{“description”: “Sergio Martinez-Hoyer human MDS cell-line MDS-L, RUNX1 knockout cell line stimulated with lenalidomide. Replicate 3 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>write.csv(int, &quot;./output/summary_MDSL_triplicate.csv&quot;, row.names = F)</code></pre>
+<blockquote>
+<p>Hypothesis:</p>
+</blockquote>
+<ul>
+<li>Loss of Runx1 reduces Lenalidomide (Len) sensitivity of MDS-L cell line by altering the gene expression response to Len.</li>
+</ul>
+<blockquote>
+<p>Aims:</p>
+</blockquote>
+<ul>
+<li>To identify Len-responsive genes: i.e. differentially expressed DMSO vs. Len in parental MDS-L cell line.<br />
+</li>
+<li>To identify Runx1-dependent genes: i.e. differentially expressed in Len-treated MDS-L vs. KO (perhaps normalize to DMSO condition in both cell lines?)</li>
+</ul>
+</div>
+<div id="access-expression-data-for-samples-of-interest" class="section level2">
+<h2>Access expression data for samples of interest</h2>
+<pre class="r"><code>libs &lt;- amlpmpdata::db_libraries[match(int$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),]</code></pre>
+<p>How to retrieve expr data tables: We can find all mRNA expression analysis files by querying the db_paths table. This gives a separate file for each sample. MShadbolt wrote a python script to join all these files and create one big tsv containing <strong>tpm counts</strong> that can be loaded as follows:</p>
+<p><a href="file://isaac/klabanalysis/mshadbolt/KARSANBIO-1352_Karsan_Lab_Informatics_Support/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval/report/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval.html" class="uri">file://isaac/klabanalysis/mshadbolt/KARSANBIO-1352_Karsan_Lab_Informatics_Support/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval/report/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval.html</a></p>
+<pre class="r"><code>mrnas &lt;- read_tsv(&quot;/projects/karsanlab/PMP-AML/expression/bcbio_fastrnaseq_salmon/salmon_AML_PMP_expression_output.tsv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   Name = col_character()
+## )</code></pre>
+<pre><code>## See spec(...) for full column specifications.</code></pre>
+<pre class="r"><code>kable(mrnas[1:5, 1:5])</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Name</th>
+<th align="right">A15372</th>
+<th align="right">A30673</th>
+<th align="right">A35631</th>
+<th align="right">A30490</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ENST00000456328</td>
+<td align="right">0.266225</td>
+<td align="right">1.238218</td>
+<td align="right">0.603082</td>
+<td align="right">0.541529</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000450305</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">ENST00000488147</td>
+<td align="right">5.534983</td>
+<td align="right">5.711727</td>
+<td align="right">10.658560</td>
+<td align="right">8.945182</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000619216</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">ENST00000473358</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+</tbody>
+</table>
+<div id="select-only-libraries-of-interest" class="section level4">
+<h4>Select only libraries of interest</h4>
+<pre class="r"><code>Name &lt;- mrnas$Name
+expr &lt;- mrnas[, match(libs$library_name, colnames(mrnas))]
+expr$Name &lt;- Name
+expr &lt;- select(expr, Name, everything())
+
+kable(head(expr))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Name</th>
+<th align="right">A54948</th>
+<th align="right">A54949</th>
+<th align="right">A54950</th>
+<th align="right">A54951</th>
+<th align="right">A54952</th>
+<th align="right">A54953</th>
+<th align="right">A54954</th>
+<th align="right">A54955</th>
+<th align="right">A54956</th>
+<th align="right">A54957</th>
+<th align="right">A54958</th>
+<th align="right">A54959</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ENST00000456328</td>
+<td align="right">0.074745</td>
+<td align="right">0.295906</td>
+<td align="right">0.185494</td>
+<td align="right">0.000000</td>
+<td align="right">0.231783</td>
+<td align="right">0.000000</td>
+<td align="right">0.061365</td>
+<td align="right">0.256001</td>
+<td align="right">0.200632</td>
+<td align="right">0.000000</td>
+<td align="right">0.207074</td>
+<td align="right">0.166321</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000450305</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.010100</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">ENST00000488147</td>
+<td align="right">0.684298</td>
+<td align="right">1.168550</td>
+<td align="right">1.149269</td>
+<td align="right">0.629464</td>
+<td align="right">0.981391</td>
+<td align="right">0.832764</td>
+<td align="right">0.881181</td>
+<td align="right">1.119525</td>
+<td align="right">0.746178</td>
+<td align="right">0.863707</td>
+<td align="right">0.984333</td>
+<td align="right">1.961214</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000619216</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">ENST00000473358</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.029053</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000469289</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 
 
