@@ -1,0 +1,25 @@
+---
+title: "Expression analysis in MDS-L / Runx1 KO treated with Len"
+author: "Jennifer Grants"
+date: "1/9/2019"
+output:
+  html_document:
+    keep_md: true
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+```
+
+## Load saved data
+`exprs` is mRNA-seq TPM values, `libs` is metadata
+```{r}
+load("expr.RData")
+load("libs.RData")
+```
+
