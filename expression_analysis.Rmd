@@ -19,7 +19,7 @@ library(pheatmap)
 library(DESeq2)
 ```
 
-## Load saved data
+## Load saved data 
 `expr` is mRNA-seq TPM values, `libs` is metadata
 ```{r load_saved}
 load("expr.RData")
@@ -39,8 +39,62 @@ libs$Treatment <- factor(libs$Treatment, levels = c("Ctrl", "Len"))
 kable(libs)
 ```
 
+## Quality control checks 
 
-## Perform DEseq2 analysis to identify differentially expressed genes in WT+Ctrl vs WT+Len only
+### Basics 
+##### First convert row names from column "Names":
+```{r convert_row_names}
+expr2 <- column_to_rownames(expr, var = "Name")
+
+head(expr2)
+```
+
+
+##### Dimensions: 
+```{r dims}
+# expression data
+dim(expr2)
+
+# metadata
+dim(libs)
+```
+
+
+##### NA values: 
+```{r na_vals}
+any(is.na(expr2))
+```
+
+
+##### Range:
+```{r}
+range(expr2)
+```
+Appears not to be log transformed.
+
+
+## Data transformation / row normalization
+##### Log2 transformation
+```{r}
+# log2 transformation with constant +0.01 added to allow transformation of zeros
+expr.log <- log2(expr2 + 0.01)
+
+# Visualize log transformed data
+hist(as.matrix(expr.log))
+
+```
+ASK: Why does this have so many 0 values? Is this normal for RNA-seq?
+
+
+##### Row z-scores
+Method from seminar 6:
+```{r}
+expr.norm <- t(scale(t(expr.log)))
+```
+START HERE
+
+
+## Perform DEseq2 analysis to identify differentially expressed genes in WT+Ctrl vs WT+Len only 
 ```{r deseq_setup}
 expr.wt <- expr[, which(colnames(expr) %in% c(libs[which(libs$Genotype == "WT"),]$library_name, "Name"))]
 
