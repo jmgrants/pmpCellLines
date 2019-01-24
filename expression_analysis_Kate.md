@@ -1,4 +1,4 @@
-# Expression analysis in MDS-L / Runx1 KO treated with Len
+# Expression analysis for Kate's RNA-seq data
 Jennifer Grants  
 1/9/2019  
 

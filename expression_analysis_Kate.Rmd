@@ -1,5 +1,5 @@
 ---
-title: "Expression analysis in MDS-L / Runx1 KO treated with Len"
+title: "Expression analysis for Kate's RNA-seq data"
 author: "Jennifer Grants"
 date: "1/9/2019"
 output:
