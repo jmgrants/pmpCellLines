@@ -1,0 +1,182 @@
+---
+title: "Expression analysis in MDS-L / Runx1 KO treated with Len"
+author: "Jennifer Grants"
+date: "1/9/2019"
+output:
+  html_document:
+    keep_md: true
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(knitr)
+library(pheatmap)
+library(DESeq2)
+```
+
+## Load saved data   
+`expr` is mRNA-seq TPM values, `libs` is metadata
+```{r load_saved}
+load("./Kate/expr.RData")
+load("./Kate/libs.RData")
+```
+
+```{r add_design_factors}
+libs$SPG_target <- ifelse(test = grepl(pattern = "GFP", x = libs$specimen_subset_external_id), yes = "ctrl", no = 
+                                       ifelse(test = grepl(pattern = "OR", x = libs$specimen_subset_external_id), yes = "both", no =
+                                                             ifelse(test = grepl(pattern = "143fix", x = libs$specimen_subset_external_id), yes = "miR-143", no = 
+                                                                      ifelse(test = grepl(pattern = "Xfix", x = libs$specimen_subset_external_id), yes = "miR-X", no = "none"))))
+```
+
+
+```{r prev_libs}
+kable(libs)
+```
+
+## Quality control checks  
+
+### First convert row names from column "Names":  
+```{r convert_row_names}
+expr2 <- column_to_rownames(expr, var = "Name")
+
+head(expr2)
+```
+
+
+### Dimensions:   
+```{r dims}
+# expression data
+dim(expr2)
+
+# metadata
+dim(libs)
+```
+
+
+### NA values:   
+```{r na_vals}
+any(is.na(expr2))
+```
+
+
+### Range:  
+```{r}
+range(expr2)
+```
+
+```{r}
+hist(as.matrix(expr2))
+```
+Appears not to be log transformed.    
+
+
+## Data transformation / row normalization  
+### Log2 transformation  
+```{r log_transf}
+# log2 transformation with constant +0.01 added to allow transformation of zeros
+expr.log <- log2(expr2 + 0.01)
+
+# Visualize log transformed data
+hist(as.matrix(expr.log))
+
+```
+ASK: Why does this have so many 0 values? Is this normal for RNA-seq?  
+
+
+
+## DE-seq  
+```{r make_deseq}
+design.table <- select(libs, library_name, SPG_target) %>%
+  column_to_rownames(var = "library_name")
+
+expr.matrix <- column_to_rownames(expr, var = "Name") %>%
+  select(rownames(design.table)) %>% # put columns in same order as the design matrix
+  as.matrix()
+
+# filter to "highly expressed" genes
+thresh <- expr.matrix >= 1
+keep <- rowSums(thresh) >= 2 # keep rows where there are > 2 samples with tpm > 1
+
+expr.matrix.keep <- expr.matrix[keep,]
+
+# convert to integers for DEseq
+int.matrix.keep <- round(expr.matrix.keep, digits = 0)
+
+dds <- DESeqDataSetFromMatrix(countData = int.matrix.keep, colData = design.table, design = ~SPG_target)
+
+res <- DESeq(dds)
+```
+
+
+### Summarise results by each SPG group  
+
+#### miR-143 vs. ctrl  
+```{r results_143}
+resultsNames(res)
+
+result.pair <- results(res, contrast = c("SPG_target", "miR.143", "ctrl")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair[which(result.pair$padj < 0.05),]))
+
+write.csv(x = result.pair, file = "./Kate/DEseq/miR143_vs_ctrl.csv")
+```
+
+```{r miR143_volcano}
+# cutoffs: padj < 0.05, |FC| > 2
+dat <- read.csv("./Kate/DEseq/miR143_vs_ctrl.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.05), 
+         Signif_delta = abs(log2FoldChange) > log2(2),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+
+
+
+#### miR-X vs ctrl  
+```{r results_X}
+result.pair <- results(res, contrast = c("SPG_target", "miR.X", "ctrl")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair[which(result.pair$padj < 0.05),]))
+
+write.csv(x = result.pair, file = "./Kate/DEseq/miRX_vs_ctrl.csv")
+```
+
+```{r miRX_volcano}
+# cutoffs: padj < 0.05, |FC| > 2
+dat <- read.csv("./Kate/DEseq/miRX_vs_ctrl.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.05), 
+         Signif_delta = abs(log2FoldChange) > log2(2),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+
+
+#### Both vs ctrl  
+```{r results_both}
+result.pair <- results(res, contrast = c("SPG_target", "both", "ctrl")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair, 20)) # all p-values = 1, why??? Maybe the SPG didn't work to knock anything down? Maybe there was an outlier sample? ASK
+
+write.csv(x = result.pair, file = "./Kate/DEseq/originalSPG_vs_ctrl.csv")
+```
+
+```{r orig_spg_volcano}
+# cutoffs: padj < 0.05, |FC| > 2
+dat <- read.csv("./Kate/DEseq/originalSPG_vs_ctrl.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.05), 
+         Signif_delta = abs(log2FoldChange) > log2(2),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+
