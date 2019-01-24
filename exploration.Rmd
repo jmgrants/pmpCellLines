@@ -1,0 +1,121 @@
+---
+title: "PMP Cell Line Data Exploration"
+author: "Jennifer Grants"
+date: "1/8/2019"
+output:
+  html_document:
+    keep_md: true
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(amlpmpdata)
+library(knitr)
+```
+
+
+
+## Load specimen list and identify cell lines samples of interest
+```{r load_specimens}
+specimens <- amlpmpdata::db_specimens
+
+```
+
+Add patient metadata, and then filter out patient samples:
+```{r add_pt_meta}
+pt_meta <- amlpmpdata::db_patients
+
+specimens$is_patient <- pt_meta[match(specimens$patient_external_id, pt_meta$external_id),]$is_patient
+
+kable(head(specimens))
+```
+
+
+
+```{r filter_out_pt}
+cells <- specimens[which(specimens$is_patient == F),]
+
+kable(head(cells))
+```
+
+```{r summary_non_pt}
+write.csv(cells, "./output/summary_non_patient_samples.csv", row.names = F)
+```
+
+
+## Investigate datasets of interest  
+
+## Kate's miR SPG experiment  
+
+```{r mdsl_samples}
+int <- filter(cells, patient_external_id == "UT-7")
+
+kable(int)
+```
+
+```{r summary_Kate}
+write.csv(int, "./Kate/summary.csv", row.names = F)
+```
+
+
+> Experimental design: Kate's data  
+
+* Original sponge (OR) that targets miR-143 and miR-X  
+* miR-143-specific sponge (143fix)  
+* miR-X-specific sponge (Xfix)  
+* vs. GFP control or untransduced UT-7 cells
+
+> Rationale and Hypothesis: (Kate's thesis)  
+
+* The original miR-143 sponge contains several potential repetitive seed sequences, besides that of miR-143 (seed sequence GAGAUGA), and so may target additional miR's  
+* Among these putative miR seeds, Kate identified a complementary novel miR (miR-X, seed sequence CUGUAGC) that is: 
+    * expressed in human AML  
+    * predicted to target several genes whose protein products were upregulated in a SILAC experiment that used the OR sponge (greater Obs/Pred ratio of target upregulation than miR-143; still very low though)  
+* _Hypothesis_: mi
+
+> Aims:  
+
+* To identify miR-143-specific and miR-X-specific target genes  
+    * based on mRNA upregulation upon specific fixed sponge treatments vs. OR sponge treatment
+* To compare miR-143 and miR-X targets to Kate's SILAC results  
+
+
+### Access expression data for samples of interest  
+```{r find_libs_Kate}
+libs <- amlpmpdata::db_libraries[match(int$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),]
+```
+
+How to retrieve expr data tables:  
+We can find all mRNA expression analysis files by querying the db_paths table. This gives a separate file for each sample. MShadbolt wrote a python script to join all these files and create one big tsv containing **tpm counts** that can be loaded as follows:  
+
+file://isaac/klabanalysis/mshadbolt/KARSANBIO-1352_Karsan_Lab_Informatics_Support/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval/report/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval.html  
+
+```{r load_mrna_Kate}
+mrnas <- read_tsv("/projects/karsanlab/PMP-AML/expression/bcbio_fastrnaseq_salmon/salmon_AML_PMP_expression_output.tsv")
+```
+
+
+### Select only libraries of interest
+```{r libs_of_int_Kate}
+Name <- mrnas$Name
+expr <- mrnas[,which(colnames(mrnas) %in% libs$library_name)]
+expr$Name <- Name
+expr <- select(expr, Name, everything())
+
+kable(head(expr))
+```
+
+
+### Save Rdata files for downstream analysis  
+```{r save_Kate}
+save(expr, file = "./Kate/expr.RData")
+save(libs, file = "./Kate/libs.RData")
+```
+
+
+

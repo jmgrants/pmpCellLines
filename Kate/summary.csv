@@ -1,0 +1,14 @@
+"patient_external_id","specimen_external_id","meta","is_patient"
+"UT-7","UT-7",NA,FALSE
+"UT-7","UT-7-GFP1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition GFP, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-GFP2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition GFP, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-GFP3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition GFP, replicate 3 of 3""}",FALSE
+"UT-7","UT-7-OR-SPG1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition Original Sponge, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-OR-SPG2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition Original Sponge, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-OR-SPG3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition Original Sponge, replicate 3 of 3""}",FALSE
+"UT-7","UT-7-143fixSPG1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-143fixed sponge, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-143fixSPG2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-143fixed sponge, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-143fixSPG3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-143fixed sponge, replicate 3 of 3""}",FALSE
+"UT-7","UT-7-XfixSPG1","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-Xfixed sponge, replicate 1 of 3""}",FALSE
+"UT-7","UT-7-XfixSPG2","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-Xfixed sponge, replicate 2 of 3""}",FALSE
+"UT-7","UT-7-XfixSPG3","{""description"": ""Kate Slowski human acute megakaryocytic cell line UT-7, condition miR-Xfixed sponge, replicate 3 of 3""}",FALSE
