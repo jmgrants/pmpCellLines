@@ -70,13 +70,12 @@ write.csv(int, "./Kate/summary.csv", row.names = F)
 * miR-X-specific sponge (Xfix)  
 * vs. GFP control or untransduced UT-7 cells
 
-> Rationale and Hypothesis: (Kate's thesis)  
+> Rationale: (Kate's thesis)  
 
 * The original miR-143 sponge contains several potential repetitive seed sequences, besides that of miR-143 (seed sequence GAGAUGA), and so may target additional miR's  
 * Among these putative miR seeds, Kate identified a complementary novel miR (miR-X, seed sequence CUGUAGC) that is: 
     * expressed in human AML  
     * predicted to target several genes whose protein products were upregulated in a SILAC experiment that used the OR sponge (greater Obs/Pred ratio of target upregulation than miR-143; still very low though)  
-* _Hypothesis_: mi
 
 > Aims:  
 
