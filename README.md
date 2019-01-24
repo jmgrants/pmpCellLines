@@ -11,4 +11,4 @@ The purpose of this repository is to explore the PMP cell line data using the sk
     - save: `expr` (mRNA-seq tpms) and `libs` (metadata)  
     
 * _expression_analysis.Rmd_: Starting from saved `expr` and `libs`, perform DEseq2 analysis  
-    - save: `result` (running DEseq(dds) -- takes a long time to run!; file: deseqResult.RData)  
+    - save: Results of DEseq comparisons for each construct (construct/GFP ctrl) as .csv files in `DEseq` folder

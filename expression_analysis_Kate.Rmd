@@ -161,7 +161,7 @@ ggplot(dat, aes(log2FoldChange, -log10(padj))) +
 
 
 #### Both vs ctrl  
-```{r results_both}
+```{r results_original_spg}
 result.pair <- results(res, contrast = c("SPG_target", "both", "ctrl")) # contrast: the factor, then numerator, then denominator
 
 kable(head(result.pair, 20)) # all p-values = 1, why??? Maybe the SPG didn't work to knock anything down? Maybe there was an outlier sample? ASK
