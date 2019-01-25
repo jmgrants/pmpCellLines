@@ -1,0 +1,10 @@
+"patient_external_id","specimen_external_id","meta","is_patient"
+"OCI-AML3","OCI-AML3_shSCR-1","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 1 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#9-1","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 1 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#10-1","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 1 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shSCR-2","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 2 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#9-2","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 2 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#10-2","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 2 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shSCR-3","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 3 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#9-3","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 3 of 3.""}",FALSE
+"OCI-AML3","OCI-AML3_shFBXO11#10-3","{""description"": ""Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 3 of 3.""}",FALSE

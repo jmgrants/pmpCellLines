@@ -131,6 +131,11 @@ $(document).ready(function () {
 <li><a href="#select-only-libraries-of-interest">Select only libraries of interest</a></li>
 <li><a href="#save-rdata-files-for-downstream-analysis">Save Rdata files for downstream analysis</a></li>
 </ul></li>
+<li><a href="#fbxo11-knockdown">FBXO11 knockdown</a><ul>
+<li><a href="#access-expression-data-for-samples-of-interest-1">Access expression data for samples of interest</a></li>
+<li><a href="#select-only-libraries-of-interest-1">Select only libraries of interest</a></li>
+<li><a href="#save-rdata-files-for-downstream-analysis-1">Save Rdata files for downstream analysis</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -523,6 +528,215 @@ kable(head(expr))</code></pre>
 <h3>Save Rdata files for downstream analysis</h3>
 <pre class="r"><code>save(expr, file = &quot;./Kate/expr.RData&quot;)
 save(libs, file = &quot;./Kate/libs.RData&quot;)</code></pre>
+</div>
+</div>
+<div id="fbxo11-knockdown" class="section level2">
+<h2>FBXO11 knockdown</h2>
+<pre class="r"><code>int &lt;- filter(cells, grepl(pattern = &quot;Linda&quot;, x = cells$meta))
+
+kable(int)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">patient_external_id</th>
+<th align="left">specimen_external_id</th>
+<th align="left">meta</th>
+<th align="left">is_patient</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shSCR-1</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 1 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shFBXO11#9-1</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 1 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shFBXO11#10-1</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 1 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shSCR-2</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 2 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shFBXO11#9-2</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 2 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shFBXO11#10-2</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 2 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shSCR-3</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 3 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shFBXO11#9-3</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 3 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">OCI-AML3</td>
+<td align="left">OCI-AML3_shFBXO11#10-3</td>
+<td align="left">{“description”: “Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 3 of 3.”}</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>write.csv(int, &quot;./FBXO11/summary.csv&quot;, row.names = F)</code></pre>
+<blockquote>
+<p>Experimental design: FBXO11 knockdown data</p>
+</blockquote>
+<ul>
+<li>FBXO11 shRNA knockdown (2 different shRNA constructs)<br />
+</li>
+<li>vs. sh-Scrambled controls<br />
+</li>
+<li>(in triplicate)</li>
+</ul>
+<blockquote>
+<p>Rationale and Hypothesis:</p>
+</blockquote>
+<ul>
+<li>FBXO11 is part of a E3 ubiquitin ligase complex, therefore loss of FBXO11 will affect protein expression level. These changes may in turn affect gene expression, causing changes in cellular function.<br />
+</li>
+<li>FBXO11 is lost in some AMLs, and FBXO11 loss in mice causes AML-like disease when combined with a predisposing mutation (AML-ETO). Therefore the functional changes evoked by FBXO11 knockdown may be causal in AML development.<br />
+</li>
+<li><em>Hypothesis</em>: Loss of FBXO11 causes gene expression changes that alter cellular function to promote AML development.</li>
+</ul>
+<blockquote>
+<p>Aims:</p>
+</blockquote>
+<ul>
+<li>To identify processes and pathways upregulated upon knockdown of FBXO11 (changes in cellular function)<br />
+</li>
+<li>To compare these results to proteomics data from Linda and Gerben to determine potential FBXO11-target-protein regulators of these gene expression changes</li>
+</ul>
+<div id="access-expression-data-for-samples-of-interest-1" class="section level3">
+<h3>Access expression data for samples of interest</h3>
+<pre class="r"><code>libs &lt;- amlpmpdata::db_libraries[match(int$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),]</code></pre>
+</div>
+<div id="select-only-libraries-of-interest-1" class="section level3">
+<h3>Select only libraries of interest</h3>
+<pre class="r"><code>Name &lt;- mrnas$Name
+expr &lt;- mrnas[,which(colnames(mrnas) %in% libs$library_name)]
+expr$Name &lt;- Name
+expr &lt;- select(expr, Name, everything())
+
+kable(head(expr))</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Name</th>
+<th align="right">A54945</th>
+<th align="right">A54947</th>
+<th align="right">A54946</th>
+<th align="right">A54944</th>
+<th align="right">A54940</th>
+<th align="right">A54942</th>
+<th align="right">A54941</th>
+<th align="right">A54939</th>
+<th align="right">A54943</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">ENST00000456328</td>
+<td align="right">0.176085</td>
+<td align="right">0.560645</td>
+<td align="right">0.101541</td>
+<td align="right">0.458976</td>
+<td align="right">0.115138</td>
+<td align="right">0.306703</td>
+<td align="right">0.274130</td>
+<td align="right">0.381055</td>
+<td align="right">0.179624</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000450305</td>
+<td align="right">0.609390</td>
+<td align="right">0.234522</td>
+<td align="right">0.169559</td>
+<td align="right">0.000000</td>
+<td align="right">0.141108</td>
+<td align="right">0.266956</td>
+<td align="right">0.513587</td>
+<td align="right">0.045370</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">ENST00000488147</td>
+<td align="right">3.944083</td>
+<td align="right">4.438525</td>
+<td align="right">4.941163</td>
+<td align="right">4.643798</td>
+<td align="right">3.260512</td>
+<td align="right">2.980054</td>
+<td align="right">3.091821</td>
+<td align="right">4.443674</td>
+<td align="right">2.964437</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000619216</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="odd">
+<td align="left">ENST00000473358</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+<tr class="even">
+<td align="left">ENST00000469289</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+<td align="right">0.000000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="save-rdata-files-for-downstream-analysis-1" class="section level3">
+<h3>Save Rdata files for downstream analysis</h3>
+<pre class="r"><code>save(expr, file = &quot;./FBXO11/expr.RData&quot;)
+save(libs, file = &quot;./FBXO11/libs.RData&quot;)</code></pre>
 </div>
 </div>
 

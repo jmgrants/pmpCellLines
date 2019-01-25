@@ -146,7 +146,7 @@ mrnas <- read_tsv("/projects/karsanlab/PMP-AML/expression/bcbio_fastrnaseq_salmo
 ```
 
 
-### Select only libraries of interest
+### Select only libraries of interest  
 
 ```r
 Name <- mrnas$Name
@@ -177,4 +177,90 @@ save(libs, file = "./Kate/libs.RData")
 ```
 
 
+
+## FBXO11 knockdown  
+
+```r
+int <- filter(cells, grepl(pattern = "Linda", x = cells$meta))
+
+kable(int)
+```
+
+
+
+patient_external_id   specimen_external_id     meta                                                                                                                                    is_patient 
+--------------------  -----------------------  --------------------------------------------------------------------------------------------------------------------------------------  -----------
+OCI-AML3              OCI-AML3_shSCR-1         {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 1 of 3."}    FALSE      
+OCI-AML3              OCI-AML3_shFBXO11#9-1    {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 1 of 3."}    FALSE      
+OCI-AML3              OCI-AML3_shFBXO11#10-1   {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 1 of 3."}   FALSE      
+OCI-AML3              OCI-AML3_shSCR-2         {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 2 of 3."}    FALSE      
+OCI-AML3              OCI-AML3_shFBXO11#9-2    {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 2 of 3."}    FALSE      
+OCI-AML3              OCI-AML3_shFBXO11#10-2   {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 2 of 3."}   FALSE      
+OCI-AML3              OCI-AML3_shSCR-3         {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with control vector (shSCR). Replicate 3 of 3."}    FALSE      
+OCI-AML3              OCI-AML3_shFBXO11#9-3    {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#9 against FBXO11. Replicate 3 of 3."}    FALSE      
+OCI-AML3              OCI-AML3_shFBXO11#10-3   {"description": "Linda Chang / Gerben Duns human AML cell-line OCI-AML3, transduced with shRNA#10 against FBXO11. Replicate 3 of 3."}   FALSE      
+
+
+
+```r
+write.csv(int, "./FBXO11/summary.csv", row.names = F)
+```
+
+
+> Experimental design: FBXO11 knockdown data  
+
+* FBXO11 shRNA knockdown (2 different shRNA constructs)  
+* vs. sh-Scrambled controls  
+* (in triplicate)  
+
+
+> Rationale and Hypothesis:  
+
+* FBXO11 is part of a E3 ubiquitin ligase complex, therefore loss of FBXO11 will affect protein expression level. These changes may in turn affect gene expression, causing changes in cellular function.  
+* FBXO11 is lost in some AMLs, and FBXO11 loss in mice causes AML-like disease when combined with a predisposing mutation (AML-ETO). Therefore the functional changes evoked by FBXO11 knockdown may be causal in AML development.  
+* _Hypothesis_: Loss of FBXO11 causes gene expression changes that alter cellular function to promote AML development.  
+
+
+> Aims:  
+
+* To identify processes and pathways upregulated upon knockdown of FBXO11 (changes in cellular function)  
+* To compare these results to proteomics data from Linda and Gerben to determine potential FBXO11-target-protein regulators of these gene expression changes  
+
+
+### Access expression data for samples of interest  
+
+```r
+libs <- amlpmpdata::db_libraries[match(int$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),]
+```
+
+
+### Select only libraries of interest  
+
+```r
+Name <- mrnas$Name
+expr <- mrnas[,which(colnames(mrnas) %in% libs$library_name)]
+expr$Name <- Name
+expr <- select(expr, Name, everything())
+
+kable(head(expr))
+```
+
+
+
+Name                 A54945     A54947     A54946     A54944     A54940     A54942     A54941     A54939     A54943
+----------------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------
+ENST00000456328    0.176085   0.560645   0.101541   0.458976   0.115138   0.306703   0.274130   0.381055   0.179624
+ENST00000450305    0.609390   0.234522   0.169559   0.000000   0.141108   0.266956   0.513587   0.045370   0.000000
+ENST00000488147    3.944083   4.438525   4.941163   4.643798   3.260512   2.980054   3.091821   4.443674   2.964437
+ENST00000619216    0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+ENST00000473358    0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+ENST00000469289    0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000   0.000000
+
+
+### Save Rdata files for downstream analysis  
+
+```r
+save(expr, file = "./FBXO11/expr.RData")
+save(libs, file = "./FBXO11/libs.RData")
+```
 

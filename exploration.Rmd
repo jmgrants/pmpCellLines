@@ -52,7 +52,7 @@ write.csv(cells, "./output/summary_non_patient_samples.csv", row.names = F)
 
 ## Kate's miR SPG experiment  
 
-```{r mdsl_samples}
+```{r kate_samples}
 int <- filter(cells, patient_external_id == "UT-7")
 
 kable(int)
@@ -94,12 +94,12 @@ We can find all mRNA expression analysis files by querying the db_paths table. T
 
 file://isaac/klabanalysis/mshadbolt/KARSANBIO-1352_Karsan_Lab_Informatics_Support/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval/report/KARSANBIO-1521_mRNA_and_miRNA_data_retrieval.html  
 
-```{r load_mrna_Kate}
+```{r load_mrna}
 mrnas <- read_tsv("/projects/karsanlab/PMP-AML/expression/bcbio_fastrnaseq_salmon/salmon_AML_PMP_expression_output.tsv")
 ```
 
 
-### Select only libraries of interest
+### Select only libraries of interest  
 ```{r libs_of_int_Kate}
 Name <- mrnas$Name
 expr <- mrnas[,which(colnames(mrnas) %in% libs$library_name)]
@@ -117,4 +117,60 @@ save(libs, file = "./Kate/libs.RData")
 ```
 
 
+
+## FBXO11 knockdown  
+```{r fbxo11_samples}
+int <- filter(cells, grepl(pattern = "Linda", x = cells$meta))
+
+kable(int)
+```
+
+
+```{r summary_FBXO11}
+write.csv(int, "./FBXO11/summary.csv", row.names = F)
+```
+
+
+> Experimental design: FBXO11 knockdown data  
+
+* FBXO11 shRNA knockdown (2 different shRNA constructs)  
+* vs. sh-Scrambled controls  
+* (in triplicate)  
+
+
+> Rationale and Hypothesis:  
+
+* FBXO11 is part of a E3 ubiquitin ligase complex, therefore loss of FBXO11 will affect protein expression level. These changes may in turn affect gene expression, causing changes in cellular function.  
+* FBXO11 is lost in some AMLs, and FBXO11 loss in mice causes AML-like disease when combined with a predisposing mutation (AML-ETO). Therefore the functional changes evoked by FBXO11 knockdown may be causal in AML development.  
+* _Hypothesis_: Loss of FBXO11 causes gene expression changes that alter cellular function to promote AML development.  
+
+
+> Aims:  
+
+* To identify processes and pathways upregulated upon knockdown of FBXO11 (changes in cellular function)  
+* To compare these results to proteomics data from Linda and Gerben to determine potential FBXO11-target-protein regulators of these gene expression changes  
+
+
+### Access expression data for samples of interest  
+```{r find_libs_FBXO11}
+libs <- amlpmpdata::db_libraries[match(int$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),]
+```
+
+
+### Select only libraries of interest  
+```{r libs_of_int_FBXO11}
+Name <- mrnas$Name
+expr <- mrnas[,which(colnames(mrnas) %in% libs$library_name)]
+expr$Name <- Name
+expr <- select(expr, Name, everything())
+
+kable(head(expr))
+```
+
+
+### Save Rdata files for downstream analysis  
+```{r save_FBXO11}
+save(expr, file = "./FBXO11/expr.RData")
+save(libs, file = "./FBXO11/libs.RData")
+```
 

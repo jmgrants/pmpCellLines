@@ -14,12 +14,15 @@ The purpose of this repository is to explore the PMP cell line data using the sk
 * _functional_analysis.Rmd_: Starting from files in the `DEseq` folder, perform functional analysis  
 
     * Specific analyses:
-    1. Kate's miR SPG data: (folder: "./Kate/") 
-    2.  
+    1. Kate's miR SPG data: folder = "./Kate/" 
+    2. FBXO11 knockdown: folder = "./FBXO11/"
 
 
 ## Specifics of functional analysis
 1. Kate's data:
 
 * Overlap genes significantly upregulated upon miR-X SPG treatment with  miR-X exact seed match genes  
-* Overlap genes significantly upregulated upon miR-143 SPG treatment with miR-143 targets predicted in TargetScan  
+* Overlap genes significantly upregulated upon miR-143 SPG treatment with miR-143 targets predicted in TargetScan 
+
+
+2. FBXO11
