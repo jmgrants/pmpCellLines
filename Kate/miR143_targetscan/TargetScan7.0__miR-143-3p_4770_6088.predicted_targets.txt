@@ -1,0 +1,101 @@
+Target gene	Representative transcript	Gene name	3P-seq tags + 5	Conserved sites total	Conserved 8mer sites	Conserved 7mer-m8 sites	Conserved 7mer-A1 sites	Poorly conserved sites total	Poorly conserved 8mer sites	Poorly conserved 7mer-m8 sites	Poorly conserved 7mer-A1 sites	6mer sites	Representative miRNA	Cumulative weighted context++ score	Total context++ score	Aggregate PCT	Previous TargetScan publication(s)
+TMEM154	ENST00000304385.3	transmembrane protein 154 	5	0	0	0	0	6	2	2	2	1	hsa-miR-143-3p	-0.90	-0.90	0.25	
+C1orf74	ENST00000294811.1	chromosome 1 open reading frame 74 	5	1	1	0	0	1	0	1	0	0	hsa-miR-143-3p	-0.80	-0.80	< 0.1	
+DENND2C	ENST00000393276.3	DENN/MADD domain containing 2C 	51	0	0	0	0	3	2	0	1	3	hsa-miR-143-3p	-0.78	-0.78	< 0.1	
+DEFA3	ENST00000327857.2	defensin, alpha 3, neutrophil-specific 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.76	-0.76	< 0.1	
+CCDC73	ENST00000531481.1	coiled-coil domain containing 73 	5	0	0	0	0	2	2	0	0	1	hsa-miR-4770	-0.76	-0.76	< 0.1	
+DEFA6	ENST00000297436.2	defensin, alpha 6, Paneth cell-specific 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.72	-0.72	< 0.1	
+ITM2B	ENST00000378565.5	integral membrane protein 2B 	10367	1	1	0	0	1	0	0	1	0	hsa-miR-4770	-0.70	-0.89	0.79	2005, 2007, 2009, 2011
+SLC25A15	ENST00000338625.4	solute carrier family 25 (mitochondrial carrier; ornithine transporter) member 15 	345	1	1	0	0	1	1	0	0	1	hsa-miR-143-3p	-0.69	-0.70	0.77	2009, 2011
+IFNA14	ENST00000380222.2	interferon, alpha 14 	5	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.68	-0.68	< 0.1	
+IFNA7	ENST00000239347.3	interferon, alpha 7 	5	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.67	-0.67	< 0.1	
+MSI2	ENST00000284073.2	musashi RNA-binding protein 2 	283	3	1	0	2	0	0	0	0	0	hsa-miR-4770	-0.67	-0.67	0.84	2011
+TMOD2	ENST00000249700.4	tropomodulin 2 (neuronal) 	117	1	1	0	0	5	1	2	2	0	hsa-miR-6088	-0.67	-0.80	< 0.1	2011
+CPB2	ENST00000181383.4	carboxypeptidase B2 (plasma) 	93	0	0	0	0	3	1	0	2	0	hsa-miR-4770	-0.66	-0.66	< 0.1	
+KRTAP9-7	ENST00000391354.1	keratin associated protein 9-7 	5	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.66	-0.66	< 0.1	
+PLA2G1B	ENST00000308366.4	phospholipase A2, group IB (pancreas) 	5	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.64	-0.64	< 0.1	
+ABHD14A	ENST00000273596.3	abhydrolase domain containing 14A 	523	1	1	0	0	0	0	0	0	0	hsa-miR-6088	-0.64	-0.64	< 0.1	
+SLC30A8	ENST00000427715.2	solute carrier family 30 (zinc transporter), member 8 	5	1	0	1	0	3	1	2	0	1	hsa-miR-143-3p	-0.64	-0.64	0.26	2009, 2011
+KRTAP9-6	ENST00000391355.1	keratin associated protein 9-6 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.63	-0.63	< 0.1	
+TSC22D3	ENST00000372390.4	TSC22 domain family, member 3 	154	1	1	0	0	1	0	1	0	0	hsa-miR-4770	-0.62	-0.62	0.76	2007, 2009, 2011
+TMEM214	ENST00000238788.9	transmembrane protein 214 	1344	0	0	0	0	3	0	1	2	0	hsa-miR-6088	-0.61	-0.61	0.29	
+IFNA16	ENST00000380216.1	interferon, alpha 16 	5	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.61	-0.61	< 0.1	
+SLC16A5	ENST00000580123.1	solute carrier family 16 (monocarboxylate transporter), member 5 	26	0	0	0	0	3	1	1	1	1	hsa-miR-4770	-0.61	-0.81	< 0.1	
+GRIN2B	ENST00000609686.1	glutamate receptor, ionotropic, N-methyl D-aspartate 2B 	5	0	0	0	0	5	0	2	3	8	hsa-miR-4770	-0.61	-0.61	0.11	
+UBXN2B	ENST00000399598.2	UBX domain protein 2B 	157	1	1	0	0	1	0	1	0	1	hsa-miR-143-3p	-0.60	-0.60	< 0.1	
+ARFGAP3	ENST00000263245.5	ADP-ribosylation factor GTPase activating protein 3 	6000	0	0	0	0	2	1	0	1	0	hsa-miR-143-3p	-0.60	-0.60	< 0.1	
+KRTAP9-8	ENST00000254072.6	keratin associated protein 9-8 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.60	-0.60	< 0.1	
+FOSL2	ENST00000379619.1	FOS-like antigen 2 	2255	2	1	0	1	8	1	5	2	7	hsa-miR-143-3p	-0.59	-1.16	0.86	2009, 2011
+KRTAP9-2	ENST00000377721.3	keratin associated protein 9-2 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.59	-0.59	< 0.1	
+OR5B2	ENST00000302581.2	olfactory receptor, family 5, subfamily B, member 2 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.58	-0.58	< 0.1	
+LMO4	ENST00000370544.5	LIM domain only 4 	294	1	1	0	0	1	0	0	1	0	hsa-miR-143-3p	-0.58	-0.61	0.74	2005, 2007, 2009, 2011
+SPATA12	ENST00000334325.1	spermatogenesis associated 12 	7	0	0	0	0	2	0	2	0	3	hsa-miR-143-3p	-0.58	-0.60	0.13	
+GATM	ENST00000396659.3	glycine amidinotransferase (L-arginine:glycine amidinotransferase) 	586	0	0	0	0	2	1	1	0	0	hsa-miR-4770	-0.58	-0.58	< 0.1	
+DENND1C	ENST00000381480.2	DENN/MADD domain containing 1C 	5	0	0	0	0	2	0	0	2	0	hsa-miR-4770	-0.57	-0.57	< 0.1	
+GABARAPL3	ENST00000412799.2	GABA(A) receptors associated protein like 3, pseudogene 	5	0	0	0	0	2	1	1	0	2	hsa-miR-143-3p	-0.57	-0.57	< 0.1	
+ASAP3	ENST00000495646.1	ArfGAP with SH3 domain, ankyrin repeat and PH domain 3 	196	2	1	1	0	1	0	0	1	0	hsa-miR-4770	-0.57	-0.83	0.83	2009, 2011
+MS4A14	ENST00000395001.1	membrane-spanning 4-domains, subfamily A, member 14 	5	0	0	0	0	1	1	0	0	1	hsa-miR-6088	-0.57	-0.57	ORF	
+IL18	ENST00000280357.7	interleukin 18 (interferon-gamma-inducing factor) 	5	0	0	0	0	2	0	1	1	0	hsa-miR-143-3p	-0.56	-0.56	< 0.1	
+PLXNA2	ENST00000367033.3	plexin A2 	8	0	0	0	0	2	0	0	2	3	hsa-miR-143-3p	-0.56	-0.56	< 0.1	
+FHIT	ENST00000492590.1	fragile histidine triad 	141	0	0	0	0	1	1	0	0	0	hsa-miR-143-3p	-0.56	-0.56	< 0.1	
+TMCO5A	ENST00000558158.1	transmembrane and coiled-coil domains 5A 	5	0	0	0	0	2	0	1	1	5	hsa-miR-143-3p	-0.56	-0.56	0.22	
+TRIM22	ENST00000379965.3	tripartite motif containing 22 	163	0	0	0	0	1	0	1	0	2	hsa-miR-4770	-0.55	-0.55	0.23	
+IGFL1	ENST00000437936.1	IGF-like family member 1 	9	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.54	-0.54	< 0.1	
+DKFZP779J2370	ENST00000378904.2		20	1	1	0	0	0	0	0	0	0	hsa-miR-143-3p	-0.54	-0.54	0.29	
+TFF3	ENST00000518498.1	trefoil factor 3 (intestinal) 	680	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.54	-0.54	ORF	
+GNL3	ENST00000418458.1	guanine nucleotide binding protein-like 3 (nucleolar) 	5	0	0	0	0	1	1	0	0	0	hsa-miR-143-3p	-0.53	-0.53	< 0.1	
+UTP18	ENST00000225298.7	UTP18 small subunit (SSU) processome component homolog (yeast) 	5	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.53	-0.53	< 0.1	
+VAPB	ENST00000475243.1	VAMP (vesicle-associated membrane protein)-associated protein B and C 	391	2	1	0	1	0	0	0	0	0	hsa-miR-4770	-0.53	-0.54	0.84	2005, 2007, 2009, 2011
+UBE2E3	ENST00000410062.4	ubiquitin-conjugating enzyme E2E 3 	15	1	1	0	0	1	0	1	0	0	hsa-miR-4770	-0.53	-0.57	0.79	2005, 2007, 2009, 2011
+TMEM178B	ENST00000565468.1	transmembrane protein 178B 	129	0	0	0	0	6	2	1	3	3	hsa-miR-143-3p	-0.53	-0.53	0.22	2011
+C1D	ENST00000355848.3	C1D nuclear receptor corepressor 	12	0	0	0	0	1	1	0	0	1	hsa-miR-143-3p	-0.53	-0.53	< 0.1	
+CRELD1	ENST00000326434.5	cysteine-rich with EGF-like domains 1 	185	1	1	0	0	0	0	0	0	0	hsa-miR-6088	-0.52	-0.52	0.77	2005, 2007, 2009, 2011
+CCDC58	ENST00000291458.5	coiled-coil domain containing 58 	9	1	1	0	0	0	0	0	0	0	hsa-miR-143-3p	-0.52	-0.52	0.75	2009, 2011
+ANXA9	ENST00000368947.4	annexin A9 	185	0	0	0	0	2	0	0	2	0	hsa-miR-6088	-0.52	-0.62	< 0.1	
+TMEM69	ENST00000372025.4	transmembrane protein 69 	20	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.52	-0.52	< 0.1	
+MRPL41	ENST00000371443.5	mitochondrial ribosomal protein L41 	3138	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.51	-0.51	< 0.1	
+COMMD2	ENST00000473414.1	COMM domain containing 2 	833	0	0	0	0	4	2	1	1	1	hsa-miR-143-3p	-0.51	-0.95	0.25	
+DDAH1	ENST00000535924.2	dimethylarginine dimethylaminohydrolase 1 	46	0	0	0	0	4	0	2	2	1	hsa-miR-143-3p	-0.51	-0.51	0.38	2009, 2011
+CNTD2	ENST00000430325.2	cyclin N-terminal domain containing 2 	5	0	0	0	0	2	1	1	0	2	hsa-miR-143-3p	-0.51	-0.51	0.12	
+PSG1	ENST00000436291.2	pregnancy specific beta-1-glycoprotein 1 	5	0	0	0	0	2	1	0	1	0	hsa-miR-143-3p	-0.51	-0.51	< 0.1	
+VHL	ENST00000256474.2	von Hippel-Lindau tumor suppressor, E3 ubiquitin protein ligase 	2386	0	0	0	0	3	1	1	1	1	hsa-miR-143-3p	-0.51	-0.52	< 0.1	
+CNTD1	ENST00000588408.1	cyclin N-terminal domain containing 1 	7	0	0	0	0	2	1	0	1	1	hsa-miR-143-3p	-0.51	-0.51	< 0.1	2007
+AZGP1	ENST00000292401.4	alpha-2-glycoprotein 1, zinc-binding 	11	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.51	-0.51	< 0.1	
+DEGS1	ENST00000323699.4	delta(4)-desaturase, sphingolipid 1 	1549	0	0	0	0	2	1	0	1	1	hsa-miR-143-3p	-0.50	-0.65	< 0.1	
+PSG8	ENST00000404209.4	pregnancy specific beta-1-glycoprotein 8 	5	0	0	0	0	2	1	0	1	0	hsa-miR-143-3p	-0.50	-0.50	< 0.1	
+HLA-DOA	ENST00000229829.5	major histocompatibility complex, class II, DO alpha 	7	0	0	0	0	3	2	1	0	2	hsa-miR-143-3p	-0.49	-0.49	< 0.1	
+SELL	ENST00000236147.4	selectin L 	5	0	0	0	0	2	1	0	1	1	hsa-miR-4770	-0.49	-0.49	< 0.1	
+C1orf162	ENST00000343534.5	chromosome 1 open reading frame 162 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.49	-0.49	< 0.1	
+AC008964.1	ENST00000593965.1		5	0	0	0	0	2	0	1	1	0	hsa-miR-6088	-0.49	-0.49	< 0.1	
+XCR1	ENST00000309285.3	chemokine (C motif) receptor 1 	5	0	0	0	0	2	0	0	2	3	hsa-miR-6088	-0.48	-0.48	< 0.1	
+FTSJ1	ENST00000456787.1	FtsJ RNA methyltransferase homolog 1 (E. coli) 	4860	0	0	0	0	2	1	0	1	0	hsa-miR-143-3p	-0.48	-0.63	< 0.1	
+PSG4	ENST00000405312.3	pregnancy specific beta-1-glycoprotein 4 	5	0	0	0	0	2	1	0	1	0	hsa-miR-143-3p	-0.48	-0.48	< 0.1	
+CTB-186H2.3	ENST00000591669.1	Uncharacterized protein  	5	0	0	0	0	3	0	2	1	0	hsa-miR-143-3p	-0.48	-0.48	< 0.1	
+ZNF570	ENST00000388801.3	zinc finger protein 570 	12	1	1	0	0	1	0	0	1	2	hsa-miR-6088	-0.48	-0.57	0.20	
+CXorf24	ENST00000357412.1	chromosome X open reading frame 24 	60	0	0	0	0	2	1	0	1	1	hsa-miR-6088	-0.48	-0.54	< 0.1	
+TAF1L	ENST00000242310.4	TAF1 RNA polymerase II, TATA box binding protein (TBP)-associated factor, 210kDa-like 	5	0	0	0	0	3	1	1	1	0	hsa-miR-143-3p	-0.47	-0.47	< 0.1	
+IFIT3	ENST00000371818.4	interferon-induced protein with tetratricopeptide repeats 3 	5	0	0	0	0	2	1	0	1	0	hsa-miR-143-3p	-0.47	-0.47	< 0.1	
+IGFBP5	ENST00000233813.4	insulin-like growth factor binding protein 5 	10709	1	1	0	0	0	0	0	0	2	hsa-miR-6088	-0.47	-0.48	0.79	2005, 2007, 2009, 2011
+SULT1E1	ENST00000226444.3	sulfotransferase family 1E, estrogen-preferring, member 1 	5	0	0	0	0	2	0	1	1	0	hsa-miR-6088	-0.47	-0.47	< 0.1	
+ELMOD1	ENST00000265840.7	ELMO/CED-12 domain containing 1 	24	0	0	0	0	2	0	1	1	0	hsa-miR-143-3p	-0.46	-0.46	0.23	2005, 2007
+ATP6V1A	ENST00000273398.3	ATPase, H+ transporting, lysosomal 70kDa, V1 subunit A 	180	1	1	0	0	1	0	1	0	0	hsa-miR-6088	-0.46	-0.46	0.78	2005, 2007, 2009, 2011
+UBE2E1	ENST00000306627.3	ubiquitin-conjugating enzyme E2E 1 	3195	1	1	0	0	0	0	0	0	0	hsa-miR-143-3p	-0.46	-0.46	0.26	2009, 2011
+PEG10	ENST00000482108.1	paternally expressed 10 	8778	0	0	0	0	3	0	1	2	0	hsa-miR-143-3p	-0.46	-0.46	0.25	
+TPP1	ENST00000299427.6	tripeptidyl peptidase I 	713	0	0	0	0	2	0	0	2	1	hsa-miR-6088	-0.46	-0.48	< 0.1	
+LRRC63	ENST00000595396.1	leucine rich repeat containing 63 	5	0	0	0	0	2	0	1	1	0	hsa-miR-143-3p	-0.46	-0.46	0.27	
+TBCK	ENST00000273980.5	TBC1 domain containing kinase 	20	0	0	0	0	4	0	0	4	1	hsa-miR-6088	-0.46	-0.56	< 0.1	
+AIPL1	ENST00000381129.3	aryl hydrocarbon receptor interacting protein-like 1 	5	0	0	0	0	3	1	2	0	0	hsa-miR-143-3p	-0.45	-0.45	< 0.1	
+TMEM134	ENST00000393877.3	transmembrane protein 134 	826	1	1	0	0	1	0	0	1	2	hsa-miR-6088	-0.45	-0.60	0.27	
+MFSD6L	ENST00000329805.4	major facilitator superfamily domain containing 6-like 	5	0	0	0	0	1	1	0	0	0	hsa-miR-6088	-0.45	-0.45	< 0.1	
+IFRG15	ENST00000553856.1	Homo sapiens torsin A interacting protein 2 (TOR1AIP2), transcript variant 1, mRNA. 	482	0	0	0	0	5	0	3	2	0	hsa-miR-4770	-0.45	-0.81	0.65	2011
+FAM200A	ENST00000449309.1	family with sequence similarity 200, member A 	147	0	0	0	0	1	1	0	0	1	hsa-miR-143-3p	-0.45	-0.45	< 0.1	
+NRSN1	ENST00000378491.4	neurensin 1 	5	0	0	0	0	1	1	0	0	0	hsa-miR-143-3p	-0.45	-0.45	< 0.1	2009, 2011
+PROSC	ENST00000328195.3	proline synthetase co-transcribed homolog (bacterial) 	414	0	0	0	0	1	1	0	0	1	hsa-miR-6088	-0.45	-0.45	< 0.1	
+GPR83	ENST00000243673.2	G protein-coupled receptor 83 	33	0	0	0	0	2	1	0	1	0	hsa-miR-6088	-0.45	-0.45	< 0.1	
+CYB561D1	ENST00000496961.1	cytochrome b561 family, member D1 	105	1	0	1	0	2	0	1	1	2	hsa-miR-6088	-0.45	-0.45	0.10	
+DHRS9	ENST00000602501.1	dehydrogenase/reductase (SDR family) member 9 	5	0	0	0	0	1	0	1	0	1	hsa-miR-143-3p	-0.45	-0.45	< 0.1	
+SELT	ENST00000471696.1	Selenoprotein T  	538	0	0	0	0	2	1	1	0	1	hsa-miR-4770	-0.44	-0.44	0.11	
+EAPP	ENST00000250454.3	E2F-associated phosphoprotein 	2883	0	0	0	0	1	0	1	0	1	hsa-miR-143-3p	-0.44	-0.44	< 0.1	
+IL36G	ENST00000259205.4	interleukin 36, gamma 	5	0	0	0	0	1	1	0	0	0	hsa-miR-4770	-0.44	-0.44	< 0.1	
+INO80D	ENST00000403263.1	INO80 complex subunit D 	5	1	1	0	0	2	0	0	2	3	hsa-miR-143-3p	-0.44	-0.44	0.14	2009, 2011
+AC008443.1	ENST00000599439.1	CDNA: FLJ23158 fis, clone LNG09623; Uncharacterized protein  	109	0	0	0	0	1	1	0	0	0	hsa-miR-143-3p	-0.44	-0.44	< 0.1	
