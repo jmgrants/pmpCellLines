@@ -1,0 +1,254 @@
+---
+title: "Expression analysis for FBXO11 knockdown RNA-seq data"
+author: "Jennifer Grants"
+date: "1/9/2019"
+output:
+  html_document:
+    keep_md: true
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+```
+
+```{r include=FALSE}
+library(tidyverse)
+library(knitr)
+library(pheatmap)
+library(DESeq2)
+```
+
+## Load saved data   
+`expr` is mRNA-seq TPM values, `libs` is metadata
+```{r load_saved}
+load("./FBXO11/expr.RData")
+load("./FBXO11/libs.RData")
+```
+
+```{r add_design_factors}
+libs$treatment <- ifelse(test = grepl(pattern = "shSCR", x = libs$specimen_subset_external_id), yes = "shSCR", no = 
+                           ifelse(test = grepl(pattern = "shFBXO11#9", x = libs$specimen_subset_external_id), yes = "shFBXO11.a", no = "shFBXO11.b"))
+```
+
+
+```{r prev_libs}
+kable(libs)
+```
+
+## Quality control checks  
+
+### First convert row names from column "Names":  
+```{r convert_row_names}
+expr2 <- column_to_rownames(expr, var = "Name")
+
+head(expr2)
+```
+
+
+### Dimensions:   
+```{r dims}
+# expression data
+dim(expr2)
+
+# metadata
+dim(libs)
+```
+
+
+### NA values:   
+```{r na_vals}
+any(is.na(expr2))
+```
+
+
+### Range:  
+```{r}
+range(expr2)
+```
+
+```{r histogram_original_data}
+hist(as.matrix(expr2))
+```
+Appears not to be log transformed.    
+
+
+## Data transformation / row normalization  
+### Log2 transformation  
+```{r log_transf}
+# log2 transformation with constant +0.01 added to allow transformation of zeros
+expr.log <- log2(expr2 + 0.01)
+
+# Visualize log transformed data
+hist(as.matrix(expr.log))
+
+```
+ASK: Why does this have so many 0 values? Is this normal for RNA-seq?  
+
+
+
+## DE-seq  
+```{r make_deseq}
+design.table <- select(libs, library_name, treatment) %>%
+  column_to_rownames(var = "library_name")
+
+expr.matrix <- column_to_rownames(expr, var = "Name") %>%
+  select(rownames(design.table)) %>% # put columns in same order as the design matrix
+  as.matrix()
+
+# filter to "highly expressed" genes
+thresh <- expr.matrix >= 1
+keep <- rowSums(thresh) >= 2 # keep rows where there are > 2 samples with tpm > 1
+
+expr.matrix.keep <- expr.matrix[keep,]
+
+# convert to integers for DEseq
+int.matrix.keep <- round(expr.matrix.keep, digits = 0)
+
+dds <- DESeqDataSetFromMatrix(countData = int.matrix.keep, colData = design.table, design = ~treatment)
+
+res <- DESeq(dds)
+```
+
+
+### Summarise results by each treatment group  
+
+#### shFBXO11.a vs. shSCR  
+```{r results_a}
+resultsNames(res)
+
+result.pair <- results(res, contrast = c("treatment", "shFBXO11.a", "shSCR")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair[which(result.pair$padj < 0.05),]))
+
+write.csv(x = result.pair, file = "./FBXO11/DEseq/shFBXO11a_vs_shSCR.csv")
+```
+
+```{r sh_a_volcano}
+# cutoffs: padj < 0.1, |FC| > 1.25 (permissive)
+dat.a <- read.csv("./FBXO11/DEseq/shFBXO11a_vs_shSCR.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.1), 
+         Signif_delta = abs(log2FoldChange) > log2(1.25),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat.a, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+
+
+
+#### shFBXO11.b vs shSCR  
+```{r results_b}
+result.pair <- results(res, contrast = c("treatment", "shFBXO11.b", "shSCR")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair[which(result.pair$padj < 0.05),]))
+
+write.csv(x = result.pair, file = "./FBXO11/DEseq/shFBXO11b_vs_shSCR.csv")
+```
+
+```{r sh_b_volcano}
+# cutoffs: padj < 0.1, |FC| > 1.25 (permissive)
+dat.b <- read.csv("./FBXO11/DEseq/shFBXO11b_vs_shSCR.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.1), 
+         Signif_delta = abs(log2FoldChange) > log2(1.25),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat.b, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+
+
+
+## Heatmap for differentially expressed genes in either shFBXO11 treatment  
+```{r union_genes}
+# filter to genes that are "signif" in the volcano plots above in either treatment
+genes_a <- dat.a[which(dat.a$Signif == TRUE),]$X %>% as.vector()
+genes_b <- dat.b[which(dat.b$Signif == TRUE),]$X %>% as.vector()
+
+signif.genes <- c(genes_a, genes_b)
+
+expr.signif <- expr[which(expr$Name %in% signif.genes),]
+
+expr.signif2 <- column_to_rownames(expr.signif, var = "Name")
+
+head(expr.signif2)
+```
+
+Log transform, and scale rows:  
+```{r transf_scale_union}
+# don't need to add a constant for the log scaling because all are >0
+log.norm <- log2(expr.signif2) %>%
+  t() %>% scale() %>% (t) %>% ## method from https://github.com/STAT540-UBC/STAT540-UBC.github.io/blob/master/seminars/seminars_winter_2019/seminar6/sm06_clustering-pca.md
+  as.matrix()
+
+log.norm <- na.omit(log.norm)
+any(is.na(log.norm))
+```
+
+```{r heatmap_union}
+library(RColorBrewer)
+
+heatmap_pallete <- colorRampPalette(brewer.pal(8, name = "RdBu"))(21) %>% rev
+
+anno.frame <- data.frame(sample = colnames(log.norm), shRNA = libs[match(colnames(log.norm), libs$library_name),]$treatment) %>%
+  column_to_rownames(var = "sample")
+
+anno.frame$shRNA <- factor(anno.frame$shRNA, levels = c("shSCR", "shFBXO11.a", "shFBXO11.b"))
+
+as.matrix(log.norm) %>%
+pheatmap(cluster_cols = T, 
+         cluster_rows = T, 
+         scale = "none", 
+         clustering_method = "ward.D2", 
+         clustering_distance_cols = "euclidean", 
+         show_rownames = F, 
+         annotation_col = anno.frame, color = heatmap_pallete)
+```
+
+> Conclusion: When considering all differentially expressed genes (union), shFBXO11.b (#10) is more similar to shSCR than shFBXO11.a (#9).  
+
+
+
+## Heatmap for differentially expressed genes in BOTH shFBXO11 constructs  
+```{r intersection_genes}
+signif.genes <- intersect(genes_a, genes_b)
+
+expr.signif <- expr[which(expr$Name %in% signif.genes),]
+
+expr.signif2 <- column_to_rownames(expr.signif, var = "Name")
+
+head(expr.signif2)
+```
+
+Log transform, and scale rows:  
+```{r transf_scale_intersection}
+# don't need to add a constant for the log scaling because all are >0
+log.norm <- log2(expr.signif2) %>%
+  t() %>% scale() %>% (t) %>% ## method from https://github.com/STAT540-UBC/STAT540-UBC.github.io/blob/master/seminars/seminars_winter_2019/seminar6/sm06_clustering-pca.md
+  as.matrix()
+
+log.norm <- na.omit(log.norm)
+any(is.na(log.norm))
+```
+
+
+```{r heatmap_intersection}
+anno.frame <- data.frame(sample = colnames(log.norm), shRNA = libs[match(colnames(log.norm), libs$library_name),]$treatment) %>%
+  column_to_rownames(var = "sample")
+
+anno.frame$shRNA <- factor(anno.frame$shRNA, levels = c("shSCR", "shFBXO11.a", "shFBXO11.b"))
+
+as.matrix(log.norm) %>%
+pheatmap(cluster_cols = T, 
+         cluster_rows = T, 
+         scale = "none", 
+         clustering_method = "ward.D2", 
+         clustering_distance_cols = "euclidean", 
+         show_rownames = F, 
+         annotation_col = anno.frame, color = heatmap_pallete)
+```
+
+> Conclusion: When considering the common DE genes (intersection), the two shFBXO11 treatments cluster distinctly from shSCR.  
+
+> Observation: All but 3 genes apprear to have the same directionality of change (up, up ; down, down) in the shFBXO11 treatments vs. shSCR.  
+
