@@ -6,14 +6,16 @@ The purpose of this repository is to explore the PMP cell line data using the sk
 
 ## Workflow
 * _exploration.Rmd_: Identify cell line samples of interest, develop hypotheses 
-
-    * (1) Kate's miR SPG data: (folder: "./Kate/")  
     - save: `expr` (mRNA-seq tpms) and `libs` (metadata)  
-    
+
 * _expression_analysis.Rmd_: Starting from saved `expr` and `libs`, perform DEseq2 analysis  
-    - save: Results of DEseq comparisons for each construct (construct/GFP ctrl) as .csv files in `DEseq` folder  
+    - save: Results of DEseq comparisons for each condition (condition/ctrl) as .csv files in `DEseq` folder  
     
-* _functional_analysis.Rms_: Starting from files in the `DEseq` folder, perform functional analysis  
+* _functional_analysis.Rmd_: Starting from files in the `DEseq` folder, perform functional analysis  
+
+    * Specific analyses:
+    1. Kate's miR SPG data: (folder: "./Kate/") 
+    2.  
 
 
 ## Specifics of functional analysis

@@ -1,0 +1,22 @@
+INFO [2019-01-25 11:53:41] $x
+INFO [2019-01-25 11:53:41] list(unlist(x.target), unlist(na.omit(mirx[which(mirx$padj < 
+INFO [2019-01-25 11:53:41]     0.05), ]$Gene_name)))
+INFO [2019-01-25 11:53:41] 
+INFO [2019-01-25 11:53:41] $filename
+INFO [2019-01-25 11:53:41] [1] "./Kate/functional_analysis_plots/Venn_pred_vs_upreg_mirx.png"
+INFO [2019-01-25 11:53:41] 
+INFO [2019-01-25 11:53:41] $category.names
+INFO [2019-01-25 11:53:41] c("Predicted targets", "Upregulated in DEseq")
+INFO [2019-01-25 11:53:41] 
+INFO [2019-01-25 11:53:41] $main
+INFO [2019-01-25 11:53:41] [1] "miR-X"
+INFO [2019-01-25 11:53:41] 
+INFO [2019-01-25 11:53:41] $imagetype
+INFO [2019-01-25 11:53:41] [1] "png"
+INFO [2019-01-25 11:53:41] 
+INFO [2019-01-25 11:53:41] $fill
+INFO [2019-01-25 11:53:41] c("dodgerblue", "firebrick")
+INFO [2019-01-25 11:53:41] 
+INFO [2019-01-25 11:53:41] $cat.pos
+INFO [2019-01-25 11:53:41] c(180, 180)
+INFO [2019-01-25 11:53:41] 

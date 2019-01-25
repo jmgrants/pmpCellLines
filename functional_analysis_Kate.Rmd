@@ -2,7 +2,10 @@
 title: "Functional analysis of Kate's RNA-seq data"
 author: "Jennifer Grants"
 date: "1/24/2019"
-output: html_document
+output: 
+    html_document:
+    keep_md: true
+    toc: true
 ---
 
 ```{r setup, include=FALSE}

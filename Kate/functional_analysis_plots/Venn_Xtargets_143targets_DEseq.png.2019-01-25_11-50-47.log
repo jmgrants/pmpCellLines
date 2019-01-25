@@ -1,0 +1,21 @@
+INFO [2019-01-25 11:50:47] $x
+INFO [2019-01-25 11:50:47] list(unlist(x.upreg), unlist(m143.upreg))
+INFO [2019-01-25 11:50:47] 
+INFO [2019-01-25 11:50:47] $filename
+INFO [2019-01-25 11:50:47] [1] "./Kate/functional_analysis_plots/Venn_Xtargets_143targets_DEseq.png"
+INFO [2019-01-25 11:50:47] 
+INFO [2019-01-25 11:50:47] $category.names
+INFO [2019-01-25 11:50:47] c("miR-X", "miR-143")
+INFO [2019-01-25 11:50:47] 
+INFO [2019-01-25 11:50:47] $main
+INFO [2019-01-25 11:50:47] [1] "Upregulated in DEseq (padj < 0.05)"
+INFO [2019-01-25 11:50:47] 
+INFO [2019-01-25 11:50:47] $imagetype
+INFO [2019-01-25 11:50:47] [1] "png"
+INFO [2019-01-25 11:50:47] 
+INFO [2019-01-25 11:50:47] $fill
+INFO [2019-01-25 11:50:47] c("dodgerblue", "firebrick")
+INFO [2019-01-25 11:50:47] 
+INFO [2019-01-25 11:50:47] $cat.pos
+INFO [2019-01-25 11:50:47] c(200, 180)
+INFO [2019-01-25 11:50:47] 
