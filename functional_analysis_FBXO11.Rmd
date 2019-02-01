@@ -1,0 +1,13 @@
+---
+title: 'Functional Analysis: shFBXO11'
+author: "Jennifer Grants"
+date: "1/31/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(biomaRt)
+```
+
