@@ -68,17 +68,38 @@ identical(genes_a, genes_b)
 
 ## now limit the expr data frame to only transcripts covered in a & b (identical)
 expr_common <- expr[which(expr$Name %in% a$Transcript),]
-expr_common$Gene_name <- anno[match(expr_common$Name, anno$ensembl_transcript_id),]$hgnc_symbol
+expr_common$Name <- anno[match(expr_common$Name, anno$ensembl_transcript_id),]$hgnc_symbol
+expr_common$Description <- "na"
 
 # make GSEA expression set format
-expr_set <- dplyr::select(expr_common, Gene_name, everything(), -Name) %>%
-  filter(Gene_name != "")
+expr_set <- dplyr::select(expr_common, Name, Description, everything()) %>%
+  filter(Name != "")
 
 head(expr_set)
 
 ```
 
 ```{r}
-write.table(x = expr_set, file = "./FBXO11/GSEA_")
+write.table(x = expr_set, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_commonEffectOnly.txt", sep = "\t", row.names = F, quote = F)
+```
+
+## And .cls file for expression analysis
+```{r}
+meta <- dplyr::select(libs, library_name, treatment)
+
+numbers <- c(nrow(meta), length(unique(meta$treatment)), 1) # 1st line of .cls file: samples, groups, (always 1)
+
+names <- unique(meta$treatment) %>% unlist() # 2nd line of .cls file: names of groups
+
+order <- data.frame(sample_order = colnames(expr_set[,3:ncol(expr_set)])) # make sure the order of expr_set columns and .cls file order are same!
+order$treatment <- meta[match(order$sample_order, meta$library_name),]$treatment
+
+groups <- unlist(order$treatment) # 3rd line of .cls file: group assignment of each sample (in the same order as colnames in exprset)
+
+# combine into 1 .cls file
+write(x = numbers, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(numbers))
+write(x = names, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(names), append = TRUE)
+write(x = groups, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(groups), append = TRUE)
+
 ```
 

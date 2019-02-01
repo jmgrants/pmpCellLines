@@ -133,50 +133,80 @@ head(b)
 ```
 
 
-# Make GSEA expression datasets
+# Make GSEA expression datasets (for common effect genes only)  
+
+> It's typical to make expression datasets for everything, and then let GSEA sort out which are significant and the same in all files. BUT, I want to focus on the things that are the same between the 2 shFBXO11 constructs, so I'm going to limit the expression data to the common effect genes.  
+
 
 ```r
-# Create score based on logFC and how small the p-value is
-a <- mutate(a, score = -log10(adj.P.Val)*logFC)
-b <- mutate(b, score = -log10(adj.P.Val)*logFC)
+# load the expr data and metadata
+load("./FBXO11/expr.RData")
+load("./FBXO11/libs.RData")
 
-# Make GSEA expression datasets
-expr_a <- dplyr::select(a, Gene_name, score) %>%
-  arrange(desc(score)) %>%
-  filter(Gene_name != "")
-expr_b <- dplyr::select(b, Gene_name, score) %>%
-  arrange(desc(score)) %>%
-  filter(Gene_name != "")
+# repeat add design factors
+libs$treatment <- ifelse(test = grepl(pattern = "shSCR", x = libs$specimen_subset_external_id), yes = "shSCR", no = 
+                           ifelse(test = grepl(pattern = "shFBXO11#9", x = libs$specimen_subset_external_id), yes = "shFBXO11.9", no = "shFBXO11.10"))
 
-head(expr_a)
+# select expression data for common genes only
+## first test if expr_a and expr_b genes are truly all same
+genes_a <- dplyr::select(a, Transcript) %>% arrange(Transcript) %>% unlist()
+genes_b <- dplyr::select(b, Transcript) %>% arrange(Transcript) %>% unlist()
+
+identical(genes_a, genes_b)
 ```
 
 ```
-##    Gene_name    score
-## 1        HLX 8.457065
-## 2       FGL2 6.537112
-## 3 HIST2H2AA4 5.510349
-## 4      HBEGF 5.242530
-## 5      BCAR1 5.232297
-## 6       CD1D 5.042439
+## [1] TRUE
 ```
 
 ```r
-head(expr_b)
+## now limit the expr data frame to only transcripts covered in a & b (identical)
+expr_common <- expr[which(expr$Name %in% a$Transcript),]
+expr_common$Name <- anno[match(expr_common$Name, anno$ensembl_transcript_id),]$hgnc_symbol
+expr_common$Description <- "na"
+
+# make GSEA expression set format
+expr_set <- dplyr::select(expr_common, Name, Description, everything()) %>%
+  filter(Name != "")
+
+head(expr_set)
 ```
 
 ```
-##   Gene_name    score
-## 1     THBS1 4.782465
-## 2   DNAJC5B 4.622435
-## 3     BCAR1 4.393856
-## 4    SAMSN1 4.279557
-## 5      CD1C 3.882832
-## 6      TGM2 3.703369
+## # A tibble: 6 x 11
+##   Name  Description A54945 A54947 A54946 A54944 A54940 A54942 A54941 A54939
+##   <chr> <chr>        <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>
+## 1 ISG15 na           14.6   20.7   22.8   23.8   25.7   13.3   19.4   17.7 
+## 2 PRXL… na            7.47   3.20   4.82   2.93   5.02   6.99   3.70  11.1 
+## 3 PRXL… na            7.14   5.23   3.89   3.68   3.60   8.86   3.48   6.17
+## 4 RPL22 na            8.97   4.90   5.71   4.89   3.44   7.78   4.50   9.12
+## 5 ACOT7 na           64.0   54.9   53.6   52.5   54.2   66.5   49.8   66.5 
+## 6 VAMP3 na           19.2   26.1   28.2   26.0   29.8   20.5   27.1   20.8 
+## # ... with 1 more variable: A54943 <dbl>
 ```
+
 
 ```r
-write.table(x = expr_a, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_shFBXO11-9_commonEffect.txt", sep = "\t", row.names = F, quote = F)
-write.table(x = expr_b, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_shFBXO11-10_commonEffect.txt", sep = "\t", row.names = F, quote = F)
+write.table(x = expr_set, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_commonEffectOnly.txt", sep = "\t", row.names = F, quote = F)
+```
+
+## And .cls file for expression analysis
+
+```r
+meta <- dplyr::select(libs, library_name, treatment)
+
+numbers <- c(nrow(meta), length(unique(meta$treatment)), 1) # 1st line of .cls file: samples, groups, (always 1)
+
+names <- unique(meta$treatment) %>% unlist() # 2nd line of .cls file: names of groups
+
+order <- data.frame(sample_order = colnames(expr_set[,3:ncol(expr_set)])) # make sure the order of expr_set columns and .cls file order are same!
+order$treatment <- meta[match(order$sample_order, meta$library_name),]$treatment
+
+groups <- unlist(order$treatment) # 3rd line of .cls file: group assignment of each sample (in the same order as colnames in exprset)
+
+# combine into 1 .cls file
+write(x = numbers, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(numbers))
+write(x = names, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(names), append = TRUE)
+write(x = groups, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(groups), append = TRUE)
 ```
 
