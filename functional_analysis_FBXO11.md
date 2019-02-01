@@ -143,9 +143,14 @@ head(b)
 load("./FBXO11/expr.RData")
 load("./FBXO11/libs.RData")
 
-# repeat add design factors
+# add design factors
 libs$treatment <- ifelse(test = grepl(pattern = "shSCR", x = libs$specimen_subset_external_id), yes = "shSCR", no = 
-                           ifelse(test = grepl(pattern = "shFBXO11#9", x = libs$specimen_subset_external_id), yes = "shFBXO11.9", no = "shFBXO11.10"))
+                           ifelse(test = grepl(pattern = "shFBXO11#9", x = libs$specimen_subset_external_id), yes = "shFBXO11a", no = "shFBXO11b"))
+
+meta <- dplyr::select(libs, library_name, treatment)
+## now reorder the metadata so that treatments are grouped
+meta <- arrange(meta, desc(treatment))
+order <- as.character(meta$library_name)
 
 # select expression data for common genes only
 ## first test if expr_a and expr_b genes are truly all same
@@ -166,23 +171,25 @@ expr_common$Name <- anno[match(expr_common$Name, anno$ensembl_transcript_id),]$h
 expr_common$Description <- "na"
 
 # make GSEA expression set format
-expr_set <- dplyr::select(expr_common, Name, Description, everything()) %>%
-  filter(Name != "")
+expr_set <- expr_common[, c("Name", "Description", order)] # put sample names in same order as metadata
+expr_set <- dplyr::select(expr_set, Name, Description, everything())
+
+# expr_set_log <- mutate_if(.tbl = expr_set, .predicate = is.numeric, .funs = log2) ## not necessary to log transform according to GSEA FAQ
 
 head(expr_set)
 ```
 
 ```
 ## # A tibble: 6 x 11
-##   Name  Description A54945 A54947 A54946 A54944 A54940 A54942 A54941 A54939
+##   Name  Description A54939 A54942 A54945 A54941 A54944 A54947 A54940 A54943
 ##   <chr> <chr>        <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>
-## 1 ISG15 na           14.6   20.7   22.8   23.8   25.7   13.3   19.4   17.7 
-## 2 PRXL… na            7.47   3.20   4.82   2.93   5.02   6.99   3.70  11.1 
-## 3 PRXL… na            7.14   5.23   3.89   3.68   3.60   8.86   3.48   6.17
-## 4 RPL22 na            8.97   4.90   5.71   4.89   3.44   7.78   4.50   9.12
-## 5 ACOT7 na           64.0   54.9   53.6   52.5   54.2   66.5   49.8   66.5 
-## 6 VAMP3 na           19.2   26.1   28.2   26.0   29.8   20.5   27.1   20.8 
-## # ... with 1 more variable: A54943 <dbl>
+## 1 ISG15 na           17.7   13.3   14.6   19.4   23.8   20.7   25.7   23.2 
+## 2 PRXL… na           11.1    6.99   7.47   3.70   2.93   3.20   5.02   4.33
+## 3 PRXL… na            6.17   8.86   7.14   3.48   3.68   5.23   3.60   2.99
+## 4 RPL22 na            9.12   7.78   8.97   4.50   4.89   4.90   3.44   3.13
+## 5 ACOT7 na           66.5   66.5   64.0   49.8   52.5   54.9   54.2   49.9 
+## 6 VAMP3 na           20.8   20.5   19.2   27.1   26.0   26.1   29.8   29.9 
+## # ... with 1 more variable: A54946 <dbl>
 ```
 
 
@@ -193,16 +200,11 @@ write.table(x = expr_set, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_commonEffe
 ## And .cls file for expression analysis
 
 ```r
-meta <- dplyr::select(libs, library_name, treatment)
-
 numbers <- c(nrow(meta), length(unique(meta$treatment)), 1) # 1st line of .cls file: samples, groups, (always 1)
 
-names <- unique(meta$treatment) %>% unlist() # 2nd line of .cls file: names of groups
+names <- c("#", unique(meta$treatment)) %>% unlist() # 2nd line of .cls file: #symbol + names of groups
 
-order <- data.frame(sample_order = colnames(expr_set[,3:ncol(expr_set)])) # make sure the order of expr_set columns and .cls file order are same!
-order$treatment <- meta[match(order$sample_order, meta$library_name),]$treatment
-
-groups <- unlist(order$treatment) # 3rd line of .cls file: group assignment of each sample (in the same order as colnames in exprset)
+groups <- unlist(meta$treatment) # 3rd line of .cls file: group assignment of each sample (in the same order as colnames in exprset)
 
 # combine into 1 .cls file
 write(x = numbers, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(numbers))

@@ -55,9 +55,14 @@ head(b)
 load("./FBXO11/expr.RData")
 load("./FBXO11/libs.RData")
 
-# repeat add design factors
+# add design factors
 libs$treatment <- ifelse(test = grepl(pattern = "shSCR", x = libs$specimen_subset_external_id), yes = "shSCR", no = 
                            ifelse(test = grepl(pattern = "shFBXO11#9", x = libs$specimen_subset_external_id), yes = "shFBXO11a", no = "shFBXO11b"))
+
+meta <- dplyr::select(libs, library_name, treatment)
+## now reorder the metadata so that treatments are grouped
+meta <- arrange(meta, desc(treatment))
+order <- as.character(meta$library_name)
 
 # select expression data for common genes only
 ## first test if expr_a and expr_b genes are truly all same
@@ -72,8 +77,10 @@ expr_common$Name <- anno[match(expr_common$Name, anno$ensembl_transcript_id),]$h
 expr_common$Description <- "na"
 
 # make GSEA expression set format
-expr_set <- expr_common[,order(names(expr_common))] # put sample names in numerical order
+expr_set <- expr_common[, c("Name", "Description", order)] # put sample names in same order as metadata
 expr_set <- dplyr::select(expr_set, Name, Description, everything())
+
+# expr_set_log <- mutate_if(.tbl = expr_set, .predicate = is.numeric, .funs = log2) ## not necessary to log transform according to GSEA FAQ
 
 head(expr_set)
 
@@ -85,16 +92,11 @@ write.table(x = expr_set, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_commonEffe
 
 ## And .cls file for expression analysis
 ```{r}
-meta <- dplyr::select(libs, library_name, treatment)
-
 numbers <- c(nrow(meta), length(unique(meta$treatment)), 1) # 1st line of .cls file: samples, groups, (always 1)
 
 names <- c("#", unique(meta$treatment)) %>% unlist() # 2nd line of .cls file: #symbol + names of groups
 
-order <- data.frame(sample_order = colnames(expr_set[,3:ncol(expr_set)])) # make sure the order of expr_set columns and .cls file order are same!
-order$treatment <- meta[match(order$sample_order, meta$library_name),]$treatment
-
-groups <- unlist(order$treatment) # 3rd line of .cls file: group assignment of each sample (in the same order as colnames in exprset)
+groups <- unlist(meta$treatment) # 3rd line of .cls file: group assignment of each sample (in the same order as colnames in exprset)
 
 # combine into 1 .cls file
 write(x = numbers, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls", ncolumns = length(numbers))
