@@ -46,20 +46,39 @@ head(b)
 ```
 
 
-# Make GSEA expression datasets (for common effect genes only)
+# Make GSEA expression datasets (for common effect genes only)  
+
+> It's typical to make expression datasets for everything, and then let GSEA sort out which are significant and the same in all files. BUT, I want to focus on the things that are the same between the 2 shFBXO11 constructs, so I'm going to limit the expression data to the common effect genes.  
+
 ```{r}
-# Create score based on logFC and how small the p-value is
-a <- mutate(a, score = -log10(adj.P.Val)*logFC)
-b <- mutate(b, score = -log10(adj.P.Val)*logFC)
+# load the expr data and metadata
+load("./FBXO11/expr.RData")
+load("./FBXO11/libs.RData")
 
-# Make GSEA expression datasets
-expr_a <- dplyr::select(a, Gene_name, score) %>%
-  arrange(desc(score)) %>%
-  filter(Gene_name != "")
-expr_b <- dplyr::select(b, Gene_name, score) %>%
-  arrange(desc(score)) %>%
+# repeat add design factors
+libs$treatment <- ifelse(test = grepl(pattern = "shSCR", x = libs$specimen_subset_external_id), yes = "shSCR", no = 
+                           ifelse(test = grepl(pattern = "shFBXO11#9", x = libs$specimen_subset_external_id), yes = "shFBXO11.9", no = "shFBXO11.10"))
+
+# select expression data for common genes only
+## first test if expr_a and expr_b genes are truly all same
+genes_a <- dplyr::select(a, Transcript) %>% arrange(Transcript) %>% unlist()
+genes_b <- dplyr::select(b, Transcript) %>% arrange(Transcript) %>% unlist()
+
+identical(genes_a, genes_b)
+
+## now limit the expr data frame to only transcripts covered in a & b (identical)
+expr_common <- expr[which(expr$Name %in% a$Transcript),]
+expr_common$Gene_name <- anno[match(expr_common$Name, anno$ensembl_transcript_id),]$hgnc_symbol
+
+# make GSEA expression set format
+expr_set <- dplyr::select(expr_common, Gene_name, everything(), -Name) %>%
   filter(Gene_name != "")
 
-head(expr_a)
-head(expr_b)
+head(expr_set)
+
 ```
+
+```{r}
+write.table(x = expr_set, file = "./FBXO11/GSEA_")
+```
+
