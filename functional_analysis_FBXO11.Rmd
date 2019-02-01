@@ -78,7 +78,8 @@ expr_common$Description <- "na"
 
 # make GSEA expression set format
 expr_set <- expr_common[, c("Name", "Description", order)] # put sample names in same order as metadata
-expr_set <- dplyr::select(expr_set, Name, Description, everything())
+expr_set <- dplyr::select(expr_set, Name, Description, everything()) %>%
+  filter(Name != "")
 
 # expr_set_log <- mutate_if(.tbl = expr_set, .predicate = is.numeric, .funs = log2) ## not necessary to log transform according to GSEA FAQ
 
@@ -105,3 +106,4 @@ write(x = groups, file = "./FBXO11/GSEA_onLimma/Phenotypes_commonEffectOnly.cls"
 
 ```
 
+> The GSEA heatmap for REST vs. shSCR looks good - the .cls file is correctly specifying the shSCR control and shFBXO11 experimentals!
