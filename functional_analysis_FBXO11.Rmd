@@ -2,7 +2,10 @@
 title: 'Functional Analysis: shFBXO11'
 author: "Jennifer Grants"
 date: "1/31/2019"
-output: html_document
+output: 
+  html_document:
+    keep_md: true
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -29,7 +32,40 @@ head(b)
 human <- useMart("ensembl", "hsapiens_gene_ensembl")
 attr <- listAttributes(human)
 genes.of.int <- c(as.character(a$Transcript), as.character(b$Transcript)) %>% unique()
+head(genes.of.int)
+```
 
+```{r}
 anno <- getBM(attributes = c("ensembl_transcript_id", "hgnc_symbol"), filters = "ensembl_transcript_id", values = genes.of.int, mart = human)
+
+a$Gene_name <- anno[match(a$Transcript, anno$ensembl_transcript_id),]$hgnc_symbol
+b$Gene_name <- anno[match(b$Transcript, anno$ensembl_transcript_id),]$hgnc_symbol
+
+head(a)
+head(b)
+```
+
+
+# Make GSEA expression datasets
+```{r}
+# Create score based on logFC and how small the p-value is
+a <- mutate(a, score = -log10(adj.P.Val)*logFC)
+b <- mutate(b, score = -log10(adj.P.Val)*logFC)
+
+# Make GSEA expression datasets
+expr_a <- dplyr::select(a, Gene_name, score) %>%
+  arrange(desc(score)) %>%
+  filter(Gene_name != "")
+expr_b <- dplyr::select(b, Gene_name, score) %>%
+  arrange(desc(score)) %>%
+  filter(Gene_name != "")
+
+head(expr_a)
+head(expr_b)
+```
+```{r}
+write.table(x = expr_a, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_shFBXO11-9_commonEffect.txt", sep = "\t", row.names = F, quote = F)
+write.table(x = expr_b, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_shFBXO11-10_commonEffect.txt", sep = "\t", row.names = F, quote = F)
+
 ```
 
