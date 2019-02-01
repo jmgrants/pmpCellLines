@@ -89,7 +89,9 @@ ASK: Why does this have so many 0 values? Is this normal for RNA-seq?
 
 # DE-seq  
 
-> NOTE: Limma analysis appears to have more power for detecting relevant gene expression changes for n=3 per treatment group. Skip to Limma section.
+> NOTE: Limma analysis appears to have more power for detecting relevant gene expression changes, probably because it better estimates the variance and because it is possible to model 3 conditions to avoid losing power
+
+> Skip to Limma section!!
 
 
 ```{r make_deseq}
@@ -211,6 +213,8 @@ pheatmap(cluster_cols = T,
 
 > Conclusion: When considering all differentially expressed genes (union), shFBXO11.b (#10) is more similar to shSCR than shFBXO11.a (#9).  
 
+> Overall: Try Limma analysis to better estimate variance and to avoid losing statistical power when doing separate pairwise comparisons.
+
 
 
 ## Heatmap for differentially expressed genes in BOTH shFBXO11 constructs  
@@ -259,7 +263,9 @@ pheatmap(cluster_cols = T,
 
 # Limma analysis  
 
-> Note: Limma analysis works well for low "n" experiments because it uses a moderated t-test to better estimate variance across genes.  
+> Note: Limma analysis works well for low "n" experiments because it uses a moderated t-test to better estimate variance across genes. 
+
+> It IS possible to perform limma for 3 groups, then report results for each comparison (avoids losing power!)
 
 ```{r setup2, include=FALSE}
 # clear environment to start fresh for limma
@@ -443,8 +449,22 @@ pheatmap(cluster_cols = T,
 ```
 
 
-### Clusters of interest: extract expression data in limma result for each shFBXO11 construct
-```{r}
+### Clusters of interest: extract expression data in limma result for each shFBXO11 construct  
 
+Interested in transcript clusters B (downreg in shFBXO11's) and D (upreg in shFBXO11's)
+```{r}
+anno.cl2 <- rownames_to_column(anno.rowclusters, var = "Transcript")
+
+top_a_clust <- left_join(top_a, anno.cl2) %>%
+  na.omit() %>%
+  filter(cluster %in% c("B", "D"))
+
+write.csv(x = top_a_clust, file = "./FBXO11/Limma/Limma_commonEffectClusters_shFBXO11-9_vs_shSCR.csv", row.names = F)
+
+top_b_clust <- left_join(top_b, anno.cl2) %>%
+  na.omit() %>%
+  filter(cluster %in% c("B", "D"))
+
+write.csv(x = top_b_clust, file = "./FBXO11/Limma/Limma_commonEffectClusters_shFBXO11-10_vs_shSCR.csv", row.names = F)
 ```
 

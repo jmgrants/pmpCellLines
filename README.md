@@ -7,15 +7,21 @@ The purpose of this repository is to explore the PMP cell line data using the sk
 ## Workflow
 * _exploration_: Identify cell line samples of interest, develop hypotheses 
     - save: `expr` (mRNA-seq tpms) and `libs` (metadata)  
-
-* _expression_analysis_: Starting from saved `expr` and `libs`, perform DEseq2 analysis  
-    - save: Results of DEseq comparisons for each condition (condition/ctrl) as .csv files in `DEseq` folder  
     
-* _functional_analysis_: Starting from files in the `DEseq` folder, perform functional analysis  
-
     * Specific analyses:
     1. Kate's miR SPG data: folder = "./Kate/" 
     2. FBXO11 knockdown: folder = "./FBXO11/"
+
+* _expression_analysis_: Starting from saved `expr` and `libs`, perform DEseq2 analysis  
+    - save: Results of DEseq comparisons for each condition (condition/ctrl), as `.csv` files in `DEseq` folder  
+        - NOTE: Do not use DEseq results, as pairwise comparisons reduce power!
+    - save: Results of Limma analysis (full model with 3 shRNA treatment groups), exported as separate files showing fold change for each shFBXO11 construct, as `.csv` files in `DEseq` folder
+    - save: Filtered results of Limma analysis, with results for gene clusters that had common effect in both shFBXO11 constructs, as `commonEffectClusters...csv` files in `DEseq` folder
+  
+    
+* _functional_analysis_: Starting from files in the `DEseq` folder, perform functional analysis  
+
+    
 
 
 ## Specifics of functional analysis
