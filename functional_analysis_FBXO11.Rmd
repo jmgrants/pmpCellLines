@@ -11,3 +11,25 @@ library(tidyverse)
 library(biomaRt)
 ```
 
+# Load common effect cluster gene Limma analysis results  
+```{r common_effect_limma}
+files <- list.files("./FBXO11/Limma", full.names = T)
+files
+
+a <- read.csv(files[2])
+b <- read.csv(files[1])
+
+head(a)
+head(b)
+```
+
+
+# Biomart conversion of transcript names to gene names
+```{r}
+human <- useMart("ensembl", "hsapiens_gene_ensembl")
+attr <- listAttributes(human)
+genes.of.int <- c(as.character(a$Transcript), as.character(b$Transcript)) %>% unique()
+
+anno <- getBM(attributes = c("ensembl_transcript_id", "hgnc_symbol"), filters = "ensembl_transcript_id", values = genes.of.int, mart = human)
+```
+

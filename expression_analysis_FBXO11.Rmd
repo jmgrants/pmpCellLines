@@ -379,7 +379,7 @@ signif.genes <- common_genes
 
 
 ## Heatmap for differentially expressed genes in BOTH shFBXO11 constructs  
-```{r intersection_genes}
+```{r intersection_genes_limma}
 expr.signif <- expr[which(expr$Name %in% signif.genes),]
 
 expr.signif2 <- column_to_rownames(expr.signif, var = "Name")
@@ -388,7 +388,7 @@ head(expr.signif2)
 ```
 
 Log transform, and scale rows:  
-```{r transf_scale_intersection}
+```{r transf_scale_limma}
 # don't need to add a constant for the log scaling because all are >0
 log.norm <- log2(expr.signif2) %>%
   t() %>% scale() %>% (t) %>% ## method from https://github.com/STAT540-UBC/STAT540-UBC.github.io/blob/master/seminars/seminars_winter_2019/seminar6/sm06_clustering-pca.md
@@ -399,7 +399,7 @@ any(is.na(log.norm))
 ```
 
 
-```{r heatmap_intersection}
+```{r heatmap_int_limma}
 anno.frame <- data.frame(sample = colnames(log.norm), shRNA = libs[match(colnames(log.norm), libs$library_name),]$treatment) %>%
   column_to_rownames(var = "sample")
 
@@ -452,7 +452,7 @@ pheatmap(cluster_cols = T,
 ### Clusters of interest: extract expression data in limma result for each shFBXO11 construct  
 
 Interested in transcript clusters B (downreg in shFBXO11's) and D (upreg in shFBXO11's)
-```{r}
+```{r export_common_effect}
 anno.cl2 <- rownames_to_column(anno.rowclusters, var = "Transcript")
 
 top_a_clust <- left_join(top_a, anno.cl2) %>%
