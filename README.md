@@ -6,8 +6,13 @@ The purpose of this repository is to explore the PMP cell line data using the sk
 
 ## Specific analyses:
 
+<<<<<<< HEAD
     1. Kate's miR SPG data: folder = Kate
     2. FBXO11 knockdown: folder = FBXO11
+=======
+    1. Kate's miR SPG data: folder = `Kate`
+    2. FBXO11 knockdown: folder = `FBXO11`
+>>>>>>> ee84f03c617e005558d0a54f3ae98738cef96a8d
 
 ## Workflow
 * _exploration_: Identify cell line samples of interest, develop hypotheses 

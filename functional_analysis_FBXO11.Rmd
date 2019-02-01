@@ -46,7 +46,7 @@ head(b)
 ```
 
 
-# Make GSEA expression datasets
+# Make GSEA expression datasets (for common effect genes only)
 ```{r}
 # Create score based on logFC and how small the p-value is
 a <- mutate(a, score = -log10(adj.P.Val)*logFC)
@@ -63,9 +63,3 @@ expr_b <- dplyr::select(b, Gene_name, score) %>%
 head(expr_a)
 head(expr_b)
 ```
-```{r}
-write.table(x = expr_a, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_shFBXO11-9_commonEffect.txt", sep = "\t", row.names = F, quote = F)
-write.table(x = expr_b, file = "./FBXO11/GSEA_onLimma/GSEA_expr_set_shFBXO11-10_commonEffect.txt", sep = "\t", row.names = F, quote = F)
-
-```
-
