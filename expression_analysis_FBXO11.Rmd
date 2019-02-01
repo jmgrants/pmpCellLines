@@ -36,7 +36,7 @@ libs$treatment <- ifelse(test = grepl(pattern = "shSCR", x = libs$specimen_subse
 kable(libs)
 ```
 
-## Quality control checks  
+# Quality control checks  
 
 ### First convert row names from column "Names":  
 ```{r convert_row_names}
@@ -87,7 +87,11 @@ ASK: Why does this have so many 0 values? Is this normal for RNA-seq?
 
 
 
-## DE-seq  
+# DE-seq  
+
+> NOTE: Limma analysis appears to have more power for detecting relevant gene expression changes for n=3 per treatment group. Skip to Limma section.
+
+
 ```{r make_deseq}
 design.table <- select(libs, library_name, treatment) %>%
   column_to_rownames(var = "library_name")
@@ -111,9 +115,9 @@ res <- DESeq(dds)
 ```
 
 
-### Summarise results by each treatment group  
+## Summarise results by each treatment group  
 
-#### shFBXO11.a vs. shSCR  
+### shFBXO11.a vs. shSCR  
 ```{r results_a}
 resultsNames(res)
 
@@ -137,7 +141,7 @@ ggplot(dat.a, aes(log2FoldChange, -log10(padj))) +
 
 
 
-#### shFBXO11.b vs shSCR  
+### shFBXO11.b vs shSCR  
 ```{r results_b}
 result.pair <- results(res, contrast = c("treatment", "shFBXO11.b", "shSCR")) # contrast: the factor, then numerator, then denominator
 
@@ -251,4 +255,196 @@ pheatmap(cluster_cols = T,
 > Conclusion: When considering the common DE genes (intersection), the two shFBXO11 treatments cluster distinctly from shSCR.  
 
 > Observation: All but 3 genes apprear to have the same directionality of change (up, up ; down, down) in the shFBXO11 treatments vs. shSCR.  
+
+
+# Limma analysis  
+
+> Note: Limma analysis works well for low "n" experiments because it uses a moderated t-test to better estimate variance across genes.  
+
+```{r setup2, include=FALSE}
+# clear environment to start fresh for limma
+rm(list=ls())
+library(tidyverse)
+library(limma)
+library(edgeR)
+library(knitr)
+library(pheatmap)
+library(RColorBrewer)
+```
+
+Method from Limma User Guide section on RNA-seq: https://www.bioconductor.org/packages/devel/bioc/vignettes/limma/inst/doc/usersguide.pdf  
+
+```{r load_make_matrices}
+## Reload saved data
+load("./FBXO11/expr.RData")
+load("./FBXO11/libs.RData")
+
+
+
+# Design factors
+libs$treatment <- ifelse(test = grepl(pattern = "shSCR", x = libs$specimen_subset_external_id), yes = "ctrl", no = 
+                           ifelse(test = grepl(pattern = "shFBXO11#9", x = libs$specimen_subset_external_id), yes = "shFBXO11.a", no = "shFBXO11.b"))
+
+design.table <- select(libs, library_name, treatment) %>%
+  column_to_rownames(var = "library_name")
+design.table$treatment <- factor(design.table$treatment, levels = c("ctrl", "shFBXO11.a", "shFBXO11.b"))
+
+  ## commented out the stuff for the makeContrasts() method
+  #design.table$shSCR <- ifelse(design.table$treatment == "shSCR", yes = 1, no = 0)
+  #design.table$shFBXO11.a <- ifelse(design.table$treatment == "shFBXO11.a", yes = 1, no = 0)
+  #design.table$shFBXO11.b <- ifelse(design.table$treatment == "shFBXO11.b", yes = 1, no = 0)
+  #design.table <- select(design.table, -treatment) %>% as.matrix()
+
+# make model matrix
+model.matrix <- model.matrix(~treatment, data = design.table)
+
+  ## commented out the stuff for the makeContrasts() method
+  #x <- c("shSCR-shFBXO11.b")
+  #contrast.matrix <- makeContrasts(contrasts = x, levels = design.table)
+
+
+
+# convert expr to matrix
+expr.matrix <- column_to_rownames(expr, var = "Name") %>%
+  select(rownames(design.table)) %>% # put columns in same order as the design matrix
+  as.matrix()
+
+# filter to "highly expressed" genes
+thresh <- expr.matrix >= 5
+keep <- rowSums(thresh) >= 2 # keep rows where there are > 2 samples with tpm > 5
+
+expr.matrix.keep <- expr.matrix[keep,]
+```
+
+
+## Normalizing & log transformation
+```{r norm_trans}
+dge <- DGEList(counts = expr.matrix.keep)
+
+dge <- calcNormFactors(dge) # From the Limma Userguide: It is usual to apply scale normalization to RNA-seq read counts, and the TMM normalization method [34] in particular has been found to perform well in comparative studies. This can be applied to the DGEList object
+
+head(dge$counts)
+
+log.dge <- cpm(x = dge, normalized.lib.sizes = FALSE, log = TRUE, lib.size = NA) # using the cpm function to take the log2(count+0.01), BUT since the values are already in TPM, set all other paramters to FALSE or NA to avoid taking "per million" again.
+
+kable(head(log.dge))
+kable(head(log2(dge$counts))) ## these results are fairly similar, so I think that my method using cpm() worked
+```
+
+## Perform limma-trend analysis
+```{r limma_analysis}
+fit <- lmFit(object = log.dge, design = model.matrix)  # fit with all groups to avoid losing power, but will need to extract results for each experimental group separately
+fit <- eBayes(fit, trend=TRUE)
+
+# results for shFBXO11.a vs. ctrl
+top_a <- topTable(fit, coef = "treatmentshFBXO11.a", sort.by = "p", n = Inf) %>% 
+  rownames_to_column(var = "Transcript") %>%
+  mutate(signif = adj.P.Val < 0.05 & abs(logFC) > 1)
+head(top_a)
+ggplot(top_a, aes(logFC, -log10(adj.P.Val))) +
+  geom_point(aes(color = signif))
+
+write.csv(x = top_a, file = "./FBXO11/Limma/Limma_result_shFBXO11-9_vs_shSCR.csv", row.names = F)
+
+# results for shFBXO11.b vs. ctrl
+top_b <- topTable(fit, coef = "treatmentshFBXO11.b", sort.by = "p", n = Inf) %>% 
+  rownames_to_column(var = "Transcript") %>%
+  mutate(signif = adj.P.Val < 0.05 & abs(logFC) > 1)
+head(top_b)
+ggplot(top_b, aes(logFC, -log10(adj.P.Val))) +
+  geom_point(aes(color = signif))
+
+write.csv(x = top_b, file = "./FBXO11/Limma/Limma_result_shFBXO11-10_vs_shSCR.csv", row.names = F)
+
+# List of genes with significant adj.P.Val in both shFBXO11 treatments
+common_genes <- intersect(top_a[which(top_a$adj.P.Val < 0.05),]$Transcript, top_b[which(top_b$adj.P.Val < 0.05),]$Transcript)
+
+# Summaries
+nrow(top_a[which(top_a$adj.P.Val < 0.05),])
+nrow(top_b[which(top_b$adj.P.Val < 0.05),])
+length(common_genes)
+```
+
+### Identify the ~500 genes that are significantly altered in both shFBXO11 treatments
+```{r}
+signif.genes <- common_genes
+```
+
+
+
+## Heatmap for differentially expressed genes in BOTH shFBXO11 constructs  
+```{r intersection_genes}
+expr.signif <- expr[which(expr$Name %in% signif.genes),]
+
+expr.signif2 <- column_to_rownames(expr.signif, var = "Name")
+
+head(expr.signif2)
+```
+
+Log transform, and scale rows:  
+```{r transf_scale_intersection}
+# don't need to add a constant for the log scaling because all are >0
+log.norm <- log2(expr.signif2) %>%
+  t() %>% scale() %>% (t) %>% ## method from https://github.com/STAT540-UBC/STAT540-UBC.github.io/blob/master/seminars/seminars_winter_2019/seminar6/sm06_clustering-pca.md
+  as.matrix()
+
+log.norm <- na.omit(log.norm)
+any(is.na(log.norm))
+```
+
+
+```{r heatmap_intersection}
+anno.frame <- data.frame(sample = colnames(log.norm), shRNA = libs[match(colnames(log.norm), libs$library_name),]$treatment) %>%
+  column_to_rownames(var = "sample")
+
+anno.frame$shRNA <- factor(anno.frame$shRNA, levels = c("ctrl", "shFBXO11.a", "shFBXO11.b"))
+
+heatmap_pallete <- colorRampPalette(brewer.pal(8, name = "RdBu"))(21) %>% rev
+
+out <- as.matrix(log.norm) %>%
+pheatmap(cluster_cols = T, 
+         cluster_rows = T, 
+         scale = "none", 
+         clustering_method = "ward.D2", 
+         clustering_distance_cols = "euclidean", 
+         show_rownames = F, 
+         annotation_col = anno.frame, color = heatmap_pallete)
+
+
+```
+
+> Conclusion: Compared to DEseq, Limma analysis identified more differentially expressed genes that correspond between the 2 shFBXO11 construct treatments. 
+
+> Next step: Extract the row clusters from this heatmap to get genes that are down in both or up in both shFBXO11 construct treatments.
+
+### Extract row clusters
+```{r row_clusters}
+anno.rowclusters <- cutree(out$tree_row, k = 4) %>% as.data.frame()
+colnames(anno.rowclusters) <- "cluster"
+
+anno.rowclusters$cluster <- factor(anno.rowclusters$cluster)
+levels(anno.rowclusters$cluster) <- c("D", "B", "A", "C")
+anno.rowclusters$cluster <- factor(anno.rowclusters$cluster, levels = c("A", "B", "C", "D")) # to give them a logical order in the heatmap
+```
+
+
+## Heatmap with row clusters
+```{r heatmap_row_clusters}
+as.matrix(log.norm) %>%
+pheatmap(cluster_cols = T, 
+         cluster_rows = T, 
+         scale = "none", 
+         clustering_method = "ward.D2", 
+         clustering_distance_cols = "euclidean", 
+         show_rownames = F, 
+         annotation_col = anno.frame, 
+         color = heatmap_pallete, 
+         annotation_row = anno.rowclusters)
+```
+
+
+### Clusters of interest: extract expression data in limma result for each shFBXO11 construct
+```{r}
+
+```
 
