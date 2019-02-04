@@ -19,6 +19,7 @@ The purpose of this repository is to explore the PMP cell line data using the sk
         - NOTE: Do not use DEseq results, as pairwise comparisons reduce power!
     - save: Results of Limma analysis (full model with 3 shRNA treatment groups), exported as separate files showing fold change for each shFBXO11 construct, as `.csv` files in `Limma` folder
     - save: Filtered results of Limma analysis, with results for gene clusters that had common effect in both shFBXO11 constructs, as `commonEffectClusters ... .csv` files in `Limma` folder
+    - save: List of gene names in common effect
   
     
 * _functional_analysis_: Starting from files in the `Limma` folder, perform functional analysis  

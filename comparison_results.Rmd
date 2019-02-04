@@ -1,0 +1,100 @@
+---
+title: "Compare FBXO11 transcriptome and proteomics results"
+author: "Jennifer Grants"
+date: "2/4/2019"
+output: 
+  html_document:
+  keep_md: true
+  toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+library(tidyverse)
+```
+
+# Predictions  
+
+* Proteins that are ubiquitination targets may be detected as FBXO11 binding targets.  
+
+* The annotated functions of protein targets (either Ub or binding) may overlap with the annotated functions of altered transcripts (using GO terms). Specifically, I expect cellular functions of proteins that are normally degraded by FBXO11 to increase in shFBXO11 cells (upregulated transcripts).
+
+# Ubiquitination/binding overlap
+```{r}
+load("./FBXO11/Proteomics/rda/ub.target.list.rda")
+load("./FBXO11/Proteomics/rda/binding.target.rda")
+```
+
+```{r}
+overlap <- intersect(ub.target.list, binding.target)
+overlap
+```
+
+> Conclusion: There is no overlap between the Ub target list and the binding target list. They are very small lists, and Ub interactions could be too short-lived/weak to be detected in the coIP.  
+
+
+# Annotated functions of proteomics results and transcriptomics results  
+```{r}
+files <- list.files("./FBXO11/Limma", full.names = T)
+transcr.a <- read.csv(files[2])
+transcr.b <- read.csv(files[1])
+
+up_inSH_a <- transcr.a[which(transcr.a$logFC>0),]$Transcript %>% unlist() %>% as.character()
+up_inSH_b <- transcr.b[which(transcr.b$logFC>0),]$Transcript %>% unlist() %>% as.character()
+
+identical(up_inSH_a, up_inSH_b, attrib.as.set = F)
+
+down_inSH_a <- transcr.a[which(transcr.a$logFC<0),]$Transcript %>% unlist() %>% as.character()
+down_inSH_b <- transcr.b[which(transcr.a$logFC<0),]$Transcript %>% unlist() %>% as.character()
+
+identical(down_inSH_a, down_inSH_b, attrib.as.set = F)
+
+up_inSH <- intersect(up_inSH_a, up_inSH_b)
+down_inSH <- intersect(down_inSH_a, down_inSH_b)
+```
+
+
+```{r}
+library(biomaRt)
+
+# access GO terms for proteomics genes
+human <- useMart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl")
+
+ub.go <- getBM(attributes = c("hgnc_symbol", "name_1006"), filters = "hgnc_symbol", values = ub.target.list, mart = human) %>% filter(name_1006 != "")
+total <- length(ub.go$name_1006)
+
+ub.go.freq <- group_by(ub.go, name_1006) %>%
+  summarise(Frequency = length(name_1006)/total) %>%
+  arrange(desc(Frequency))
+
+bd.go <- getBM(attributes = c("hgnc_symbol", "name_1006"), filters = "hgnc_symbol", values = binding.target, mart = human) %>% filter(name_1006 != "")
+total <- length(bd.go$name_1006)
+
+bd.go.freq <- group_by(bd.go, name_1006) %>%
+  summarise(Frequency = length(name_1006)/total) %>%
+  arrange(desc(Frequency))
+
+# first convert up_inSH list to hgnc_symbol
+upsh.anno <- getBM(attributes = c("ensembl_transcript_id", "hgnc_symbol"), filters = "ensembl_transcript_id", values = up_inSH, mart = human)
+up.sh <- upsh.anno[which(upsh.anno$ensembl_transcript_id %in% up_inSH),]$hgnc_symbol %>% unlist() %>% as.character()
+
+# now go terms for upregulated transcripts
+
+upsh.go <- getBM(attributes = c("hgnc_symbol", "name_1006"), filters = "hgnc_symbol", values = up.sh, mart = human) %>% filter(name_1006 != "")
+total <- length(upsh.go$name_1006)
+
+upsh.go.freq <- group_by(upsh.go, name_1006) %>%
+  summarise(Frequency = length(name_1006)/total) %>%
+  arrange(desc(Frequency))
+```
+
+
+Compare GO term lists/frequencies  
+```{r}
+# see which upregulated processes in the RNA-seq data have support in the proteomics data
+bd_support <- semi_join(upsh.go.freq, bd.go.freq, by = "name_1006")
+ub_support <- semi_join(upsh.go.freq, ub.go.freq, by = "name_1006")
+```
+
+> I'm worried that these frequencies just reflect the overall frequency of common GO terms. Need a better method, e.g. GSEA with custom sets... COME BACK TO THIS LATER.
+
