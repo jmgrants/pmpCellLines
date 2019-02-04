@@ -1,0 +1,148 @@
+---
+title: "FBXO11 proteomics data comparison"
+author: "Jennifer Grants"
+date: "2/4/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+library(tidyverse)
+```
+
+# Proteomics data: Ubiquitination targets from diGly IP
+Background: See Karsan Lab Manuscripts folder > FBXO11 > All mass spec stuff in one folder for final top target compilation > 2018.04.23 Meeting with Aly and Gregg Morin.ppt
+
+## Di-Gly run 1 data  
+
+* The heavy/medium/light values for each of 3 replicates has already been assigned to the correct genotype (see the powerpoint presentation for assignments)  
+* The ratios Ratio_1 = WT(MG132)/WT(untreated) and Ratio_2 = WT(MG132)/KO(MG132) have already been calculated
+* I assume that if Ratio_2 > Ratio_1, it means that FBXO11 contributes to the ubiquitination of the protein
+```{r}
+files1 <- list.files("./FBXO11/Proteomics/diGly_run1", full.names = T)
+
+r1.1 <- read.csv(files1[1])
+r1.2 <- read.csv(files1[2])
+r1.3 <- read.csv(files1[3])
+```
+
+Check ratios:  
+```{r}
+r1.1 <- mutate(r1.1, Ratio_1_check = WT_MG132/WT_Untreated, Ratio_2_check = WT_MG132/KO_MG132)
+r1.2 <- mutate(r1.2, Ratio_1_check = WT_MG132/WT_Untreated, Ratio_2_check = WT_MG132/KO_MG132)
+r1.3 <- mutate(r1.3, Ratio_1_check = WT_MG132/WT_Untreated, Ratio_2_check = WT_MG132/KO_MG132)
+# check to make sure the ratios are what I think they are
+
+# delete ratio check columns
+r1.1 <- select(r1.1, -Ratio_1_check, -Ratio_2_check)
+r1.2 <- select(r1.2, -Ratio_1_check, -Ratio_2_check)
+r1.3 <- select(r1.3, -Ratio_1_check, -Ratio_2_check)
+
+```
+
+### Find targets where Ratio 2 > Ratio 1  
+```{r warning = FALSE}
+r1.1 <- mutate(r1.1, Target_r1 = Ratio_2 > Ratio_1, Magnitude_r1 = Ratio_2/Ratio_1) %>%
+  arrange(desc(Magnitude_r1)) %>%
+  select(Accession, Gene, Target_r1, Magnitude_r1)
+
+r1.2 <- mutate(r1.2, Target_r2 = Ratio_2 > Ratio_1, Magnitude_r2 = Ratio_2/Ratio_1) %>%
+  arrange(desc(Magnitude_r2)) %>%
+  select(Accession, Gene, Target_r2, Magnitude_r2)
+
+r1.3 <- mutate(r1.3, Target_r3 = Ratio_2 > Ratio_1, Magnitude_r3 = Ratio_2/Ratio_1) %>%
+  arrange(desc(Magnitude_r3)) %>%
+  select(Accession, Gene, Target_r3, Magnitude_r3)
+
+r1 <- full_join(r1.1, r1.2, by = c("Accession", "Gene"))
+r1 <- full_join(r1, r1.3, by = c("Accession", "Gene"))
+
+
+head(r1, 10)
+
+```
+
+> You can see from the comparison of the 3 replicates that there is not much agreement between them. Therefore, I will not proceed further with run 1.
+
+
+## DiGly run 2 data  
+
+These data are not tabulated as run 1 data were. So I will start by tabulating, according to the key provided in the powerpoint file mentioned above.  
+```{r}
+files2 <- list.files("./FBXO11/Proteomics/diGly_run2", full.names = T)
+
+r2.raw <- read.csv(files2[1]) %>%
+  select(Accession:Modifications, contains(".GG."))
+
+meta <- data.frame(Isotope = c("Light", "Medium", "Heavy"), Rep.1 = c("WT_Untreated", "WT_MG132", "KO_MG132"), Rep.2 = c("KO_MG132", "WT_Untreated", "WT_MG132"), Rep.3 = c("WT_MG132", "KO_MG132", "WT_Untreated"))
+
+r2.1 <- select(r2.raw, Accession:Modifications, contains(".1"))
+col.first <- colnames(select(r2.raw, Accession:Modifications))
+colnames(r2.1) <- c(col.first, as.character(meta$Rep.1))
+
+r2.2 <- select(r2.raw, Accession:Modifications, contains(".2"))
+colnames(r2.2) <- c(col.first, as.character(meta$Rep.2))
+
+r2.3 <- select(r2.raw, Accession:Modifications, contains(".3"))
+colnames(r2.3) <- c(col.first, as.character(meta$Rep.3))
+
+```
+
+Calculate ratios as done in run 1.
+```{r}
+r2.1 <- mutate(r2.1, Ratio_1 = WT_MG132/WT_Untreated, Ratio_2 = WT_MG132/KO_MG132, Target_r1 = Ratio_2/Ratio_1 > 1.5, Magnitude_r1 = Ratio_2/Ratio_1) %>%
+  arrange(desc(Magnitude_r1)) %>%
+  select(Accession, Gene, Target_r1, Magnitude_r1) %>%
+  na.omit()
+
+r2.2 <- mutate(r2.2, Ratio_1 = WT_MG132/WT_Untreated, Ratio_2 = WT_MG132/KO_MG132, Target_r2 = Ratio_2/Ratio_1 > 1.5, Magnitude_r2 = Ratio_2/Ratio_1) %>%
+  arrange(desc(Magnitude_r2)) %>%
+  select(Accession, Gene, Target_r2, Magnitude_r2) %>%
+  na.omit()
+
+r2.3 <- mutate(r2.3, Ratio_1 = WT_MG132/WT_Untreated, Ratio_2 = WT_MG132/KO_MG132, Target_r3 = Ratio_2/Ratio_1 > 1.5, Magnitude_r3 = Ratio_2/Ratio_1) %>%
+  arrange(desc(Magnitude_r3)) %>%
+  select(Accession, Gene, Target_r3, Magnitude_r3) %>%
+  na.omit()
+```
+
+Join all run 2 replicates.
+```{r}
+r2 <- full_join(r2.1, r2.2, by = c("Accession", "Gene"))
+r2 <- full_join(r2, r2.3, by = c("Accession", "Gene"))
+
+head(r2, 10)
+
+r2_support <- select(r2, Gene, contains("Magnitude"), contains("Target"))
+r2_support$Support <- rowSums(r2_support[,c("Target_r1", "Target_r2", "Target_r3")], na.rm = T)
+r2_support <- arrange(r2_support, desc(Support))
+
+head(r2_support, 10)
+```
+
+> There is much better concordance between replicates in run 2 of the diGly ubiquitination target assay.  
+
+* Therefore, I will identify FBXO11 complex Ubiquitination targets as proteins with support from 2/3 replicates in run 2, with magnitude of fold change (Ratio_2/Ratio_1) greater than 1.5.
+
+```{r}
+ub_targets <- filter(r2_support, Support >= 2)
+
+ub.target.list <- unique(ub_targets$Gene) %>% as.character()
+
+save(ub.target.list, file = "./FBXO11/Proteomics/rda/ub.target.list.rda")
+```
+
+
+## Flag-FBXO11 co-IP/MS data  
+
+Read in all hits that passed the 
+```{r}
+files3 <- list.files("./FBXO11/Proteomics/IP_MS", full.names = T)
+
+binding.target <- read.csv(files3[1]) %>% unique() %>% # make sure unique hits only
+  unlist() %>% as.character()
+
+save(binding.target, file = "./FBXO11/Proteomics/rda/binding.target.rda")
+```
+
+
