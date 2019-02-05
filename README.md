@@ -27,8 +27,11 @@ The purpose of this repository is to explore the PMP cell line data using the sk
 
 * _comparison_dataset_: Starting from proteomics data from Linda/Gerben/Angela in the `Proteomics` folder, compile ubiquitination targets list and binding targets list
     - save: `ub.target.list` from diGly results, and `binding.targets` from coIP results
+    - save: .csv versions of the above (for doing STRING analysis) are in `Results_summaries` folders
     
 * _comparison_results_: Make comparisons between `commonEffectClusters` genes (`Limma`) and `ub.target.list`, `binding.targets` (`Proteomics`)
+    - save: `STRING_onProteomics` and `STRING_onImmuneLE` folders
+    - save: `Hypothesis` .md file for hypothesis generated from comparing diGly Ub target network to Immune Leading Edge gene network  
 
     
 ### Specifics of functional/comparison analyses
@@ -42,4 +45,5 @@ The purpose of this repository is to explore the PMP cell line data using the sk
 
 * Using `commonEffectClusters` genes, prep data and perform GSEA analysis, EnrichmentMap network generation
 * From Linda/Gerben/Angela's proteomics data, identify ubiquitination targets (diGly experiment) and binding targets list (Flag-FBXO11 coIP/MS experiment)
+* Compare diGly STRING network (contains MAVS signalosome cluster) to GO-term "Immune" leading edge genes STRING network, to determine
 

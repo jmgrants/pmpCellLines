@@ -47,3 +47,64 @@ write.csv(x = bd.targets, file = "./FBXO11/Proteomics/Results_summaries/coIP_res
 > Performed STRING analysis on protein-protein interactions, then Autoannotate based on MCL clusters analysis (4 Biggest Words) of STRING "description".
 
 *  See: `STRING_onProteomics` folder.
+
+# Prepare GSEA GO-terms "Immune" results Leading Edge genes for STRING analysis
+Use gitbash to move all gene lists with "IMMUNE" in GO term name to a new folder, `Immune_results`.  
+Then commented out because I only need to do it once.  
+```{bash}
+#cd FBXO11/GSEA_onLimma/FBXO11_commonEffectOnly_GO.Gsea.1549051321021
+#ls
+
+#mkdir ./Immune_results
+
+#mv GO*IMMUNE*.xls ./Immune_results
+
+#cd ../../../
+#pwd
+```
+
+Manually these re-save GSEA results as .csv, because GSEA creates .xls files that are not actually .xls files.  
+Then move the .xls files to a different folder and keep the .csv files in same folder. 
+Commented out because I only need to run once.  
+```{bash}
+#cd FBXO11/GSEA_onLimma/FBXO11_commonEffectOnly_GO.Gsea.1549051321021/Immune_results
+#mkdir xls_files
+#mv *.xls ./xls_files/
+```
+
+
+Read in .csv files from `Immune_results` folder,  filter to Leading Edge genes only, and select gene name column:  
+```{r warning=FALSE, message=FALSE}
+library(readxl)
+
+files <- list.files("FBXO11/GSEA_onLimma/FBXO11_commonEffectOnly_GO.Gsea.1549051321021/Immune_results", full.names = T)
+files
+
+for(i in 1:(length(files)-1)){
+  df <- read_csv(files[i]) %>%
+    filter(`CORE ENRICHMENT` == "Yes") %>%
+    select(`PROBE`)
+  assign(paste0("d", i), df)
+}
+
+rm(df)
+
+```
+
+
+## Compile list of all leading edge genes (unique)
+```{r}
+le <- rbind(d1, d2, d3, d4, d5) %>% unlist() %>% as.character()
+
+length(le)
+sum(nrow(d1), nrow(d2), nrow(d3), nrow(d4), nrow(d5))
+
+le <- unique(le)
+length(le)
+```
+
+Save results to folder `STRING_onImmuneLE`:  
+```{r}
+write.csv(le, "./FBXO11/STRING_onImmuneLE/GO_Immune_leadingEdge_unique.csv", row.names = F)
+```
+
