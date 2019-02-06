@@ -16,10 +16,11 @@ knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
 library(tidyverse)
 library(knitr)
 library(pheatmap)
-library(DESeq2)
+library(limma)
+library(edgeR)
 ```
 
-## Load saved data   
+# Data and design  
 `expr` is mRNA-seq TPM values, `libs` is metadata
 ```{r load_saved}
 load("./Kate/expr.RData")
@@ -29,8 +30,8 @@ load("./Kate/libs.RData")
 ```{r add_design_factors}
 libs$SPG_target <- ifelse(test = grepl(pattern = "GFP", x = libs$specimen_subset_external_id), yes = "ctrl", no = 
                                        ifelse(test = grepl(pattern = "OR", x = libs$specimen_subset_external_id), yes = "both", no =
-                                                             ifelse(test = grepl(pattern = "143fix", x = libs$specimen_subset_external_id), yes = "miR-143", no = 
-                                                                      ifelse(test = grepl(pattern = "Xfix", x = libs$specimen_subset_external_id), yes = "miR-X", no = "none"))))
+                                                             ifelse(test = grepl(pattern = "143fix", x = libs$specimen_subset_external_id), yes = "miR143", no = 
+                                                                      ifelse(test = grepl(pattern = "Xfix", x = libs$specimen_subset_external_id), yes = "miRX", no = "none"))))
 ```
 
 
@@ -88,8 +89,97 @@ hist(as.matrix(expr.log))
 ASK: Why does this have so many 0 values? Is this normal for RNA-seq?  
 
 
+# Limma
+## Prep
+### Check order of sample names and colnames in meta/expr
+```{r}
+order <- libs$library_name
+expr2 <- expr2[,order]
 
-## DE-seq  
+identical(libs$library_name, colnames(expr2))
+```
+
+### Make model matrix from metadata
+```{r limma_model_matrix}
+libs$SPG_target <- factor(libs$SPG_target, levels = c("ctrl", "miR143", "miRX", "both", "none"))
+designMatrix <- model.matrix(~SPG_target, libs)
+
+head(designMatrix)
+```
+
+### Normalization and log transformation
+```{r norm_log_transf}
+# convert to matrix
+expr.matrix <- column_to_rownames(expr, var = "Name") %>%
+  as.matrix()
+
+# filter out lowly expressed genes (keep: TPM must be >=1 in at least 2 samples)
+thresh <- expr.matrix >= 1
+keep <- rowSums(thresh) >=2
+
+expr.matrix.keep <- expr.matrix[keep,]
+dim(expr.matrix.keep)
+
+# convert to DGE list object and apply Normalization
+dge <- DGEList(expr.matrix.keep)
+
+dge.norm <- calcNormFactors(dge) # using default settings
+head(dge.norm$counts) %>% kable()
+
+# log2 transform and check results
+dge.log <- cpm(x = dge.norm, log = TRUE, normalized.lib.sizes = FALSE, lib.size = NA) # use the cpm function to log transform, but set other parameters to FALSE/NA to avoid taking "per million" since my values are already in TPM
+
+head(dge.log) %>% kable()
+head(log2(dge.norm$counts + 0.25)) %>% kable() # reasonably similar to the result obtained with cpm function, which uses prior.count = 0.25 as default
+```
+
+
+## Perform linear modeling and statistics
+```{r limma_stats}
+myfit <- lmFit(dge.log, design = designMatrix)
+myfitEb <- eBayes(myfit, trend = TRUE) # trend analysis for RNA-seq data
+
+
+# make contrast table for desired comparisons (each vs. ctrl)
+myContrasts <- makeContrasts(m143_vs_ctrl = SPG_targetmiR143 - Intercept,
+                             mX_vs_ctrl = SPG_targetmiRX - Intercept,
+                             both_vs_ctrl = SPG_targetboth - Intercept,
+                             none_vs_ctrl = SPG_targetnone - Intercept, levels = designMatrix)
+
+# re-fit model with contrasts
+contfit <- contrasts.fit(myfit, myContrasts) # I double checked and the names do match; the STAT540 seminar-4 tutorial also threw the same error message
+contfitEb <- eBayes(contfit, trend = TRUE)
+
+contResult <- topTable(contfitEb, number = Inf)
+
+head(contResult) %>% kable()
+
+
+```
+
+### QC: p-value histogram
+```{r}
+hist(contResult$P.Value)
+```
+
+> NOTE: Too many low p-values???
+
+
+## Identify differentially expressed genes in contrasts
+```{r}
+testResults <- decideTests(contfitEb, p.value = 1e-4, p.adjust.methods = "fdr", method = "global")
+
+summary(testResults)
+```
+
+> NOTE: A lot of genes are massively downregulated... there must be something wrong!
+
+
+
+# DE-seq  (DO NOT USE!)
+
+> As I determined in the FBXO11 expression analaysis that Limma analysis is better powered to analyzing RNA-seq data with multiple gorups, I performed Limma instead (added above) and will proceed with those results.
+
 ```{r make_deseq}
 design.table <- select(libs, library_name, SPG_target) %>%
   column_to_rownames(var = "library_name")
