@@ -83,7 +83,9 @@ expr.log <- log2(expr2 + 0.01)
 hist(as.matrix(expr.log))
 
 ```
-ASK: Why does this have so many 0 values? Is this normal for RNA-seq?  
+* ASK: Why does this have so many 0 values? Is this normal for RNA-seq?
+    * Possible answer: Blood cells may not express that many genes highly...
+* LOOK UP: Griffith lab RNAseq data analysis tutorial online -- assumptions
 
 
 
@@ -295,11 +297,6 @@ design.table <- select(libs, library_name, treatment) %>%
   column_to_rownames(var = "library_name")
 design.table$treatment <- factor(design.table$treatment, levels = c("ctrl", "shFBXO11.a", "shFBXO11.b"))
 
-  ## commented out the stuff for the makeContrasts() method
-  #design.table$shSCR <- ifelse(design.table$treatment == "shSCR", yes = 1, no = 0)
-  #design.table$shFBXO11.a <- ifelse(design.table$treatment == "shFBXO11.a", yes = 1, no = 0)
-  #design.table$shFBXO11.b <- ifelse(design.table$treatment == "shFBXO11.b", yes = 1, no = 0)
-  #design.table <- select(design.table, -treatment) %>% as.matrix()
 
 # make model matrix
 model.matrix <- model.matrix(~treatment, data = design.table)
@@ -329,9 +326,9 @@ dge <- DGEList(counts = expr.matrix.keep)
 
 dge <- calcNormFactors(dge) # From the Limma Userguide: It is usual to apply scale normalization to RNA-seq read counts, and the TMM normalization method [34] in particular has been found to perform well in comparative studies. This can be applied to the DGEList object
 
-head(dge$counts)
+kable(head(dge$counts))
 
-log.dge <- cpm(x = dge, normalized.lib.sizes = FALSE, log = TRUE, lib.size = NA) # using the cpm function to take the log2(count+0.01), BUT since the values are already in TPM, set all other paramters to FALSE or NA to avoid taking "per million" again.
+log.dge <- cpm(y = dge, normalized.lib.sizes = FALSE, log = TRUE, lib.size = NA) # using the cpm function to take the log2(count+0.01), BUT since the values are already in TPM, set all other paramters to FALSE or NA to avoid taking "per million" again.
 
 kable(head(log.dge))
 kable(head(log2(dge$counts))) ## these results are fairly similar, so I think that my method using cpm() worked
@@ -340,10 +337,10 @@ kable(head(log2(dge$counts))) ## these results are fairly similar, so I think th
 ## Perform limma-trend analysis
 ```{r limma_analysis}
 fit <- lmFit(object = log.dge, design = model.matrix)  # fit with all groups to avoid losing power, but will need to extract results for each experimental group separately
-fit <- eBayes(fit, trend=TRUE)
+fitEb <- eBayes(fit, trend=TRUE)
 
 # results for shFBXO11.a vs. ctrl
-top_a <- topTable(fit, coef = "treatmentshFBXO11.a", sort.by = "p", n = Inf) %>% 
+top_a <- topTable(fitEb, coef = "treatmentshFBXO11.a", sort.by = "p", n = Inf) %>% 
   rownames_to_column(var = "Transcript") %>%
   mutate(signif = adj.P.Val < 0.05 & abs(logFC) > 1)
 head(top_a)
@@ -353,7 +350,7 @@ ggplot(top_a, aes(logFC, -log10(adj.P.Val))) +
 write.csv(x = top_a, file = "./FBXO11/Limma/Limma_result_shFBXO11-9_vs_shSCR.csv", row.names = F)
 
 # results for shFBXO11.b vs. ctrl
-top_b <- topTable(fit, coef = "treatmentshFBXO11.b", sort.by = "p", n = Inf) %>% 
+top_b <- topTable(fitEb, coef = "treatmentshFBXO11.b", sort.by = "p", n = Inf) %>% 
   rownames_to_column(var = "Transcript") %>%
   mutate(signif = adj.P.Val < 0.05 & abs(logFC) > 1)
 head(top_b)
@@ -370,6 +367,17 @@ nrow(top_a[which(top_a$adj.P.Val < 0.05),])
 nrow(top_b[which(top_b$adj.P.Val < 0.05),])
 length(common_genes)
 ```
+
+### QC Check: p-values histograms
+```{r}
+hist(top_a$P.Value)
+```
+
+```{r}
+hist(top_b$P.Value)
+```
+
+
 
 ### Identify the ~500 genes that are significantly altered in both shFBXO11 treatments
 ```{r}

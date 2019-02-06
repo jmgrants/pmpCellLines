@@ -1,6 +1,12 @@
-# Expression analysis for FBXO11 knockdown RNA-seq data
-Jennifer Grants  
-1/9/2019  
+---
+title: "Expression analysis for FBXO11 knockdown RNA-seq data"
+author: "Jennifer Grants"
+date: "1/9/2019"
+output:
+  html_document:
+    keep_md: true
+    toc: true
+---
 
 
 
@@ -132,7 +138,9 @@ hist(as.matrix(expr.log))
 ```
 
 ![](expression_analysis_FBXO11_files/figure-html/log_transf-1.png)<!-- -->
-ASK: Why does this have so many 0 values? Is this normal for RNA-seq?  
+* ASK: Why does this have so many 0 values? Is this normal for RNA-seq?
+    * Possible answer: Blood cells may not express that many genes highly...
+* LOOK UP: Griffith lab RNAseq data analysis tutorial online -- assumptions
 
 
 
@@ -223,8 +231,9 @@ resultsNames(res)
 ```
 
 ```
-## [1] "Intercept"           "treatmentshFBXO11.a" "treatmentshFBXO11.b"
-## [4] "treatmentshSCR"
+## [1] "Intercept"                         
+## [2] "treatment_shFBXO11.b_vs_shFBXO11.a"
+## [3] "treatment_shSCR_vs_shFBXO11.a"
 ```
 
 ```r
@@ -235,12 +244,12 @@ kable(head(result.pair[which(result.pair$padj < 0.05),]))
 
                      baseMean   log2FoldChange       lfcSE        stat      pvalue        padj
 ----------------  -----------  ---------------  ----------  ----------  ----------  ----------
-ENST00000373449      98.18959       -0.6154148   0.1730254   -3.556787   0.0003754   0.0166010
-ENST00000396651    1376.61361       -0.3277501   0.0647095   -5.064949   0.0000004   0.0000502
-ENST00000370321    1253.92354       -0.3357185   0.0741403   -4.528154   0.0000060   0.0005482
-ENST00000369642      79.15805        0.9728605   0.2301667    4.226765   0.0000237   0.0016909
-ENST00000369637      84.30236        0.8126939   0.2194637    3.703091   0.0002130   0.0107027
-ENST00000607355      52.60446        1.5005047   0.2357706    6.364256   0.0000000   0.0000001
+ENST00000373449      98.18959       -0.6872024   0.1931158   -3.558499   0.0003730   0.0164194
+ENST00000396651    1376.61361       -0.3319752   0.0656212   -5.058962   0.0000004   0.0000518
+ENST00000370321    1253.92354       -0.3414709   0.0754813   -4.523914   0.0000061   0.0005594
+ENST00000369642      79.15805        1.2160224   0.2887543    4.211271   0.0000254   0.0017828
+ENST00000369637      84.30236        0.9893354   0.2674085    3.699716   0.0002158   0.0109731
+ENST00000607355      52.60446        1.9217321   0.3069893    6.259932   0.0000000   0.0000001
 
 ```r
 write.csv(x = result.pair, file = "./FBXO11/DEseq/shFBXO11a_vs_shSCR.csv")
@@ -259,7 +268,7 @@ ggplot(dat.a, aes(log2FoldChange, -log10(padj))) +
 ```
 
 ```
-## Warning: Removed 45392 rows containing missing values (geom_point).
+## Warning: Removed 45391 rows containing missing values (geom_point).
 ```
 
 ![](expression_analysis_FBXO11_files/figure-html/sh_a_volcano-1.png)<!-- -->
@@ -274,14 +283,14 @@ result.pair <- results(res, contrast = c("treatment", "shFBXO11.b", "shSCR")) # 
 kable(head(result.pair[which(result.pair$padj < 0.05),]))
 ```
 
-                    baseMean   log2FoldChange       lfcSE        stat      pvalue        padj
-----------------  ----------  ---------------  ----------  ----------  ----------  ----------
-ENST00000344843    185.20045       -1.3292405   0.1440932   -9.224868   0.0000000   0.0000000
-ENST00000376957    536.58206       -0.4424597   0.0978025   -4.524014   0.0000061   0.0006046
-ENST00000329421     92.97947       -0.8194523   0.1756655   -4.664844   0.0000031   0.0003664
-ENST00000582401     89.83154        0.7880786   0.1767377    4.459029   0.0000082   0.0007596
-ENST00000607355     52.60446        0.7800902   0.2404243    3.244640   0.0011760   0.0395865
-ENST00000480760     48.09922        0.8970869   0.2149420    4.173623   0.0000300   0.0021964
+                    baseMean   log2FoldChange       lfcSE        stat     pvalue        padj
+----------------  ----------  ---------------  ----------  ----------  ---------  ----------
+ENST00000344843    185.20045       -1.4340034   0.1559497   -9.195293   0.00e+00   0.0000000
+ENST00000376957    536.58206       -0.4561490   0.1008886   -4.521314   6.10e-06   0.0113374
+ENST00000329421     92.97947       -0.9143182   0.1966855   -4.648630   3.30e-06   0.0072363
+ENST00000582401     89.83154        0.8797400   0.1980195    4.442693   8.90e-06   0.0152587
+ENST00000480760     48.09922        1.0812659   0.2606061    4.149043   3.34e-05   0.0417657
+ENST00000367600    167.39928        0.8321301   0.1996213    4.168544   3.07e-05   0.0412676
 
 ```r
 write.csv(x = result.pair, file = "./FBXO11/DEseq/shFBXO11b_vs_shSCR.csv")
@@ -300,7 +309,7 @@ ggplot(dat.b, aes(log2FoldChange, -log10(padj))) +
 ```
 
 ```
-## Warning: Removed 47323 rows containing missing values (geom_point).
+## Warning: Removed 5 rows containing missing values (geom_point).
 ```
 
 ![](expression_analysis_FBXO11_files/figure-html/sh_b_volcano-1.png)<!-- -->
@@ -408,12 +417,12 @@ head(expr.signif2)
 ## # A tibble: 6 x 9
 ##   A54945 A54947 A54946 A54944 A54940 A54942 A54941 A54939 A54943
 ##    <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>  <dbl>
-## 1   18.5   50.4   85.0   48.8  104.    17.6   42.2   31.5   76.7
-## 2  219.   324.   161.   305.   160.   229.   288.   217.   149. 
-## 3   82.3   47.8   19.7   46.3   27.4   73.5   45.1   95.7   19.6
-## 4  103.   213.   190.   201.   269.   108.   223.   157.   178. 
-## 5   78.5  110.   129.   126.   128.    78.9  154.    87.9  159. 
-## 6   93.5   22.6   32.9   19.1   28.7   84.5   21.8   95.8   27.7
+## 1  219.   324.   161.   305.   160.   229.   288.   217.   149. 
+## 2   93.5   22.6   32.9   19.1   28.7   84.5   21.8   95.8   27.7
+## 3   50.7   93.7   26.9   94.9   23.9   49.3   89.9   50.6   25.0
+## 4  112.   191.   207.   178.   201.   107.   164.   118.   181. 
+## 5 1217.   946.   795.   822.   701.  1162.   813.  1239.   716. 
+## 6   53.4   22.0   27.7   22.1   31.0   54.2   22.5   49.0   29.1
 ```
 
 Log transform, and scale rows:  
@@ -490,11 +499,6 @@ design.table <- select(libs, library_name, treatment) %>%
 ```r
 design.table$treatment <- factor(design.table$treatment, levels = c("ctrl", "shFBXO11.a", "shFBXO11.b"))
 
-  ## commented out the stuff for the makeContrasts() method
-  #design.table$shSCR <- ifelse(design.table$treatment == "shSCR", yes = 1, no = 0)
-  #design.table$shFBXO11.a <- ifelse(design.table$treatment == "shFBXO11.a", yes = 1, no = 0)
-  #design.table$shFBXO11.b <- ifelse(design.table$treatment == "shFBXO11.b", yes = 1, no = 0)
-  #design.table <- select(design.table, -treatment) %>% as.matrix()
 
 # make model matrix
 model.matrix <- model.matrix(~treatment, data = design.table)
@@ -531,40 +535,32 @@ dge <- DGEList(counts = expr.matrix.keep)
 
 dge <- calcNormFactors(dge) # From the Limma Userguide: It is usual to apply scale normalization to RNA-seq read counts, and the TMM normalization method [34] in particular has been found to perform well in comparative studies. This can be applied to the DGEList object
 
-head(dge$counts)
+kable(head(dge$counts))
 ```
 
-```
-##                     A54939     A54940     A54941     A54942     A54943
-## ENST00000494149   7.491241   3.406867   5.204649   6.812622   4.527275
-## ENST00000623083   6.723140   7.166121   7.513370   6.213673   6.145557
-## ENST00000599771   9.128803   9.273547   9.977130  14.545309  10.078416
-## ENST00000416931 119.985967 165.840842 162.077902 116.268604 120.318414
-## ENST00000457540  58.084029  64.861148  73.284931  70.872431  73.885293
-## ENST00000617238 350.485344 286.532116 429.256664 433.241176 285.599971
-##                     A54944     A54945     A54946     A54947
-## ENST00000494149   5.917108   6.312374   6.817580   5.484473
-## ENST00000623083   7.718823   6.107802   6.883171   7.712641
-## ENST00000599771  14.117502  13.374769  13.281399  11.277027
-## ENST00000416931  94.180728  93.371523  61.124406  88.833200
-## ENST00000457540  67.842562  68.317703  60.415320  67.094112
-## ENST00000617238 320.779323 214.998546 175.050479 260.938612
-```
+                       A54939       A54940       A54941       A54942       A54943       A54944       A54945       A54946       A54947
+----------------  -----------  -----------  -----------  -----------  -----------  -----------  -----------  -----------  -----------
+ENST00000494149      7.491241     3.406867     5.204649     6.812622     4.527275     5.917108     6.312374     6.817580     5.484473
+ENST00000623083      6.723140     7.166121     7.513370     6.213673     6.145557     7.718823     6.107802     6.883171     7.712641
+ENST00000599771      9.128803     9.273547     9.977130    14.545309    10.078416    14.117502    13.374769    13.281399    11.277027
+ENST00000416931    119.985967   165.840842   162.077902   116.268604   120.318414    94.180728    93.371523    61.124406    88.833200
+ENST00000457540     58.084029    64.861148    73.284931    70.872431    73.885293    67.842562    68.317703    60.415320    67.094112
+ENST00000617238    350.485344   286.532116   429.256664   433.241176   285.599971   320.779323   214.998546   175.050479   260.938612
 
 ```r
-log.dge <- cpm(x = dge, normalized.lib.sizes = FALSE, log = TRUE, lib.size = NA) # using the cpm function to take the log2(count+0.01), BUT since the values are already in TPM, set all other paramters to FALSE or NA to avoid taking "per million" again.
+log.dge <- cpm(y = dge, normalized.lib.sizes = FALSE, log = TRUE, lib.size = NA) # using the cpm function to take the log2(count+0.01), BUT since the values are already in TPM, set all other paramters to FALSE or NA to avoid taking "per million" again.
 
 kable(head(log.dge))
 ```
 
                      A54939     A54940     A54941     A54942     A54943     A54944     A54945     A54946     A54947
 ----------------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------
-ENST00000494149    3.052460   1.971256   2.547493   2.923034   2.356299   2.728229   2.815586   2.931765   2.622053
-ENST00000623083    2.901712   2.991249   3.056656   2.795183   2.777150   3.098013   2.769898   2.945095   3.095639
-ENST00000599771    3.329284   3.352069   3.454284   3.989907   3.468592   3.948402   3.869508   3.868930   3.629341
-ENST00000416931    7.009542   7.476353   7.442665   6.967263   7.013700   6.664869   6.650100   6.050378   6.579475
-ENST00000457540    5.966089   6.125361   6.300260   6.255078   6.312084   6.193109   6.200790   6.033613   6.175873
-ENST00000617238    8.554053   8.264335   8.846432   8.862706   8.259103   8.430248   7.851190   7.564522   8.131341
+ENST00000494149    3.346942   2.535991   2.949503   3.242304   2.807192   3.088322   3.156834   3.249305   3.006281
+ENST00000623083    3.225240   3.297230   3.350365   3.140752   3.126579   3.384192   3.120890   3.260012   3.382246
+ENST00000599771    3.576493   3.595713   3.682512   4.151134   3.694735   4.114075   4.043951   4.043440   3.833244
+ENST00000416931    7.030420   7.491488   7.458156   6.988757   7.034518   6.691331   6.676832   6.090700   6.607535
+ENST00000457540    6.008802   6.163668   6.334243   6.290130   6.345793   6.229679   6.237169   6.074400   6.212878
+ENST00000617238    8.561241   8.273117   8.852303   8.868511   8.267918   8.438079   7.862875   7.578764   8.140970
 
 ```r
 kable(head(log2(dge$counts))) ## these results are fairly similar, so I think that my method using cpm() worked
@@ -583,10 +579,10 @@ ENST00000617238    8.453210   8.162553   8.745697   8.759027   8.157852   8.3254
 
 ```r
 fit <- lmFit(object = log.dge, design = model.matrix)  # fit with all groups to avoid losing power, but will need to extract results for each experimental group separately
-fit <- eBayes(fit, trend=TRUE)
+fitEb <- eBayes(fit, trend=TRUE)
 
 # results for shFBXO11.a vs. ctrl
-top_a <- topTable(fit, coef = "treatmentshFBXO11.a", sort.by = "p", n = Inf) %>% 
+top_a <- topTable(fitEb, coef = "treatmentshFBXO11.a", sort.by = "p", n = Inf) %>% 
   rownames_to_column(var = "Transcript") %>%
   mutate(signif = adj.P.Val < 0.05 & abs(logFC) > 1)
 head(top_a)
@@ -594,19 +590,19 @@ head(top_a)
 
 ```
 ##        Transcript     logFC  AveExpr         t      P.Value    adj.P.Val
-## 1 ENST00000371732 -3.058143 3.501391 -27.98200 1.946558e-09 3.593540e-05
-## 2 ENST00000397406 -2.189460 4.101586 -24.14325 6.451672e-09 5.955216e-05
-## 3 ENST00000319340 -1.626931 4.447705 -22.94618 9.741003e-09 5.994289e-05
-## 4 ENST00000366903  2.038695 3.005491  21.68305 1.540036e-08 7.107653e-05
-## 5 ENST00000221418 -2.080709 7.166133 -19.40071 3.777763e-08 1.394826e-04
-## 6 ENST00000290705 -2.817652 3.403743 -17.61194 8.219180e-08 2.528905e-04
+## 1 ENST00000371732 -2.518802 3.799988 -31.19699 7.430023e-10 1.371656e-05
+## 2 ENST00000397406 -1.929505 4.281757 -24.62347 5.135360e-09 4.740194e-05
+## 3 ENST00000366903  1.676875 3.347192  23.04834 8.797441e-09 4.839102e-05
+## 4 ENST00000319340 -1.479387 4.580358 -22.55638 1.048503e-08 4.839102e-05
+## 5 ENST00000290705 -2.279134 3.713746 -20.62284 2.170724e-08 8.014746e-05
+## 6 ENST00000221418 -2.043354 7.190231 -19.21486 3.848571e-08 1.184141e-04
 ##           B signif
-## 1 11.105117   TRUE
-## 2 10.366337   TRUE
-## 3 10.090271   TRUE
-## 4  9.770508   TRUE
-## 5  9.106369   TRUE
-## 6  8.492993   TRUE
+## 1 11.699699   TRUE
+## 2 10.562692   TRUE
+## 3 10.201842   TRUE
+## 4 10.080175   TRUE
+## 5  9.555117   TRUE
+## 6  9.119514   TRUE
 ```
 
 ```r
@@ -620,7 +616,7 @@ ggplot(top_a, aes(logFC, -log10(adj.P.Val))) +
 write.csv(x = top_a, file = "./FBXO11/Limma/Limma_result_shFBXO11-9_vs_shSCR.csv", row.names = F)
 
 # results for shFBXO11.b vs. ctrl
-top_b <- topTable(fit, coef = "treatmentshFBXO11.b", sort.by = "p", n = Inf) %>% 
+top_b <- topTable(fitEb, coef = "treatmentshFBXO11.b", sort.by = "p", n = Inf) %>% 
   rownames_to_column(var = "Transcript") %>%
   mutate(signif = adj.P.Val < 0.05 & abs(logFC) > 1)
 head(top_b)
@@ -628,19 +624,19 @@ head(top_b)
 
 ```
 ##        Transcript     logFC  AveExpr         t      P.Value    adj.P.Val
-## 1 ENST00000265643 -2.093694 5.381668 -21.42010 1.699626e-08 0.0001553447
-## 2 ENST00000590261 -5.244484 1.673683 -20.58915 2.339378e-08 0.0001553447
-## 3 ENST00000286713 -1.721834 3.467736 -19.84612 3.146483e-08 0.0001553447
-## 4 ENST00000620913 -1.505611 4.682618 -19.68078 3.365900e-08 0.0001553447
-## 5 ENST00000344843 -1.455419 7.489801 -18.69293 5.094475e-08 0.0001667669
-## 6 ENST00000310624 -1.361929 4.200342 -18.05436 6.735584e-08 0.0001667669
+## 1 ENST00000265643 -2.007431 5.456055 -21.48200 1.558758e-08 0.0001940629
+## 2 ENST00000286713 -1.415996 3.725568 -20.33441 2.433265e-08 0.0001940629
+## 3 ENST00000620913 -1.399649 4.792965 -19.69369 3.153614e-08 0.0001940629
+## 4 ENST00000344843 -1.436316 7.506916 -18.29384 5.723279e-08 0.0002156084
+## 5 ENST00000310624 -1.237790 4.349835 -18.24830 5.839564e-08 0.0002156084
+## 6 ENST00000347703 -1.161754 5.208797 -17.62316 7.734843e-08 0.0002296508
 ##          B signif
-## 1 9.590293   TRUE
-## 2 9.365310   TRUE
-## 3 9.150868   TRUE
-## 4 9.101342   TRUE
-## 5 8.790825   TRUE
-## 6 8.575900   TRUE
+## 1 9.646958   TRUE
+## 2 9.333499   TRUE
+## 3 9.145296   TRUE
+## 4 8.697408   TRUE
+## 5 8.681928   TRUE
+## 6 8.463200   TRUE
 ```
 
 ```r
@@ -661,7 +657,7 @@ nrow(top_a[which(top_a$adj.P.Val < 0.05),])
 ```
 
 ```
-## [1] 2031
+## [1] 2049
 ```
 
 ```r
@@ -669,7 +665,7 @@ nrow(top_b[which(top_b$adj.P.Val < 0.05),])
 ```
 
 ```
-## [1] 1858
+## [1] 1856
 ```
 
 ```r
@@ -677,8 +673,25 @@ length(common_genes)
 ```
 
 ```
-## [1] 547
+## [1] 543
 ```
+
+### QC Check: p-values histograms
+
+```r
+hist(top_a$P.Value)
+```
+
+![](expression_analysis_FBXO11_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
+
+
+```r
+hist(top_b$P.Value)
+```
+
+![](expression_analysis_FBXO11_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
+
+
 
 ### Identify the ~500 genes that are significantly altered in both shFBXO11 treatments
 
