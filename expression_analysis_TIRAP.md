@@ -264,7 +264,7 @@ down.scaled <- as.data.frame(down.scaled) %>%
   rownames_to_column(var = "gene_id")
 
 up.scaled$gene <- genenames_up[match(up.scaled$gene_id, genenames_up$ensembl_gene_id),]$mgi_symbol
-down.scaled$gene <- genenames_up[match(down.scaled$gene_id, genenames_down$ensembl_gene_id),]$mgi_symbol
+down.scaled$gene <- genenames_down[match(down.scaled$gene_id, genenames_down$ensembl_gene_id),]$mgi_symbol
 
 up.scaled <- dplyr::select(up.scaled, -gene_id) %>%
   column_to_rownames(var = "gene")
