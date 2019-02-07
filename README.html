@@ -131,6 +131,7 @@ $(document).ready(function () {
 <ol style="list-style-type: decimal">
 <li>Kate’s miR SPG data: folder = Kate</li>
 <li>FBXO11 knockdown: folder = FBXO11</li>
+<li>TIRAP overexpression: folder = TIRAP</li>
 </ol>
 </div>
 <div id="workflow" class="section level2">
@@ -138,16 +139,19 @@ $(document).ready(function () {
 <ul>
 <li><em>exploration</em>: Identify cell line samples of interest, develop hypotheses
 <ul>
-<li>save: <code>expr</code> (mRNA-seq tpms) and <code>libs</code> (metadata)</li>
+<li>save: <code>expr</code> (mRNA-seq as tpm values unless otherwise stated) and <code>libs</code> (metadata)<br />
+</li>
+<li>note: in TIRAP, <code>expr</code> values are RPKM</li>
 </ul></li>
-<li><em>expression_analysis</em>: Starting from saved <code>expr</code> and <code>libs</code>, perform DEseq2 analysis
+<li><em>expression_analysis</em>: Starting from saved <code>expr</code> and <code>libs</code>, perform differential expression analysis
 <ul>
 <li>save: Results of DEseq comparisons for each condition (condition/ctrl), as <code>.csv</code> files in <code>DEseq</code> folder
 <ul>
-<li>NOTE: Do not use DEseq results, as pairwise comparisons reduce power!</li>
+<li><strong>NOTE: Do not use DEseq results, as splitting to pairwise comparisons reduce power!</strong></li>
 </ul></li>
 <li>save: Results of Limma analysis (full model with 3 shRNA treatment groups), exported as separate files showing fold change for each shFBXO11 construct, as <code>.csv</code> files in <code>Limma</code> folder</li>
 <li>save: Filtered results of Limma analysis, with results for gene clusters that had common effect in both shFBXO11 constructs, as <code>commonEffectClusters ... .csv</code> files in <code>Limma</code> folder</li>
+<li>save: List of gene names in common effect</li>
 </ul></li>
 <li><em>functional_analysis</em>: Starting from files in the <code>Limma</code> folder, perform functional analysis
 <ul>
@@ -156,8 +160,13 @@ $(document).ready(function () {
 <li><em>comparison_dataset</em>: Starting from proteomics data from Linda/Gerben/Angela in the <code>Proteomics</code> folder, compile ubiquitination targets list and binding targets list
 <ul>
 <li>save: <code>ub.target.list</code> from diGly results, and <code>binding.targets</code> from coIP results</li>
+<li>save: .csv versions of the above (for doing STRING analysis) are in <code>Results_summaries</code> folders</li>
 </ul></li>
-<li><em>comparison_results</em>: Make comparisons between <code>commonEffectClusters</code> genes (<code>Limma</code>) and <code>ub.target.list</code>, <code>binding.targets</code> (<code>Proteomics</code>)</li>
+<li><em>comparison_results</em>: Make comparisons between <code>commonEffectClusters</code> genes (<code>Limma</code>) and <code>ub.target.list</code>, <code>binding.targets</code> (<code>Proteomics</code>)
+<ul>
+<li>save: <code>STRING_onProteomics</code> and <code>STRING_onImmuneLE</code> folders</li>
+<li>save: <code>Hypothesis</code> .md file for hypothesis generated from comparing diGly Ub target network to Immune Leading Edge gene network</li>
+</ul></li>
 </ul>
 <div id="specifics-of-functionalcomparison-analyses" class="section level3">
 <h3>Specifics of functional/comparison analyses</h3>
@@ -175,6 +184,7 @@ $(document).ready(function () {
 <ul>
 <li>Using <code>commonEffectClusters</code> genes, prep data and perform GSEA analysis, EnrichmentMap network generation</li>
 <li>From Linda/Gerben/Angela’s proteomics data, identify ubiquitination targets (diGly experiment) and binding targets list (Flag-FBXO11 coIP/MS experiment)</li>
+<li>Compare diGly STRING network (contains MAVS signalosome cluster) to GO-term “Immune” leading edge genes STRING network, to determine</li>
 </ul>
 </div>
 </div>

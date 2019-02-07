@@ -1,0 +1,132 @@
+---
+title: "Expression Analysis of TIRAP-oe vs. MIG-ctrl"
+author: "Jennifer Grants"
+date: "2/6/2019"
+output: 
+  html_document:
+    keep_md: true
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE)
+
+library(tidyverse)
+library(limma)
+library(edgeR)
+library(pheatmap)
+library(RColorBrewer)
+```
+
+
+# Expression data and design
+```{r}
+load("./TIRAP/expr.rda")
+load("./TIRAP/libs.rda")
+
+head(expr) %>% kable()
+head(libs) %>% kable()
+```
+
+## QC plot
+```{r qc_expression_hist}
+column_to_rownames(expr, var = "gene_id") %>%
+  as.matrix() %>%
+  log2() %>%
+  hist(main = "log2(Expression)")
+```
+
+
+## Processing expression data
+```{r}
+expr.matrix <- column_to_rownames(expr, var = "gene_id") %>%
+  as.matrix()
+
+# filter to 'higher' expressed genes (RPKM >= 0.1 in at least 3 samples)
+thresh <- expr.matrix >= 0.1
+keep <- rowSums(thresh) >= 3
+
+expr.matrix.keep <- expr.matrix[keep,]
+
+# normalization
+dge <- DGEList(expr.matrix.keep)
+
+dge.norm <- calcNormFactors(dge)
+
+# log2 transformation
+dge.log <- cpm(dge.norm, normalized.lib.sizes = FALSE, lib.size = NA, log = TRUE, prior.count = 0.01) # prior.count changes the addition term for log2 transformation
+
+head(dge.log) %>% kable()
+```
+
+## Make design matrix
+```{r}
+# First create a factor for experimental design
+design <- select(libs, library_name, specimen_subset_external_id) %>%
+  rename(specimen = specimen_subset_external_id) %>%
+  mutate(oe = specimen) %>%
+  separate(col = oe, into = "construct", remove = T)
+
+# Model matrix
+designMatrix <- model.matrix(~construct, design)
+
+kable(designMatrix)
+```
+
+
+# Limma analysis
+## Top table
+```{r}
+fit <- lmFit(dge.log, design = designMatrix)
+fitEb <- eBayes(fit)
+
+result <- topTable(fitEb, number = Inf)
+
+head(result, 10)
+```
+
+```{r}
+write.csv(result, "./TIRAP/Limma/Limma_result_TIRAPvsMIG.csv")
+```
+
+### QC: p-value distribution
+```{r QC_pval_distr}
+hist(result$P.Value, main = "Distribution of p-values")
+```
+
+
+## Heatmap of significantly differentially expressed genes
+```{r}
+cutoff <- 0.05
+
+signif <- decideTests(fitEb, p.value = cutoff, p.adjust.methods = "fdr", method = "global")
+summary(signif)
+
+hits <- as.data.frame(signif) %>%
+  rownames_to_column(var = "gene") %>%
+  filter(constructTIRAP != 0)
+
+hits.log.expr <- dge.log[which(rownames(dge.log) %in% hits$gene),]
+
+hits.scaled <- t(hits.log.expr) %>% scale() %>% (t)
+```
+
+```{r heatmap_DE_genes}
+heatmap_pallete <- colorRampPalette(brewer.pal(8, name = "RdBu"))(21) %>% rev
+
+anno.frame <- data.frame(sample.name = colnames(hits.scaled), Construct = design[match(colnames(hits.scaled), design$library_name),]$construct) %>%
+  column_to_rownames(var = "sample.name")
+
+pheatmap(hits.scaled, 
+         cluster_cols = F, 
+         cluster_rows = T, 
+         show_rownames = F, 
+         clustering_method = "ward.D2", 
+         clustering_distance_cols = "euclidean", 
+         annotation_col = anno.frame, 
+         color = heatmap_pallete)
+```
+
+
+
+
