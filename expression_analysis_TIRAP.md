@@ -9,6 +9,14 @@ Jennifer Grants
 
 ```r
 load("./TIRAP/expr.rda")
+dim(expr) # should be 38215 rows according to RPKM.tsv
+```
+
+```
+## [1] 38215     8
+```
+
+```r
 load("./TIRAP/libs.rda")
 
 head(expr) %>% kable()
@@ -16,14 +24,14 @@ head(expr) %>% kable()
 
 
 
-gene_id                A54933    A54934    A54935    A54936    A54937    A54938
--------------------  --------  --------  --------  --------  --------  --------
-ENSMUSG00000000544     0.0000    0.0000    0.0121    0.0107    0.0000    0.0000
-ENSMUSG00000000817     0.0174    0.0129    0.0342    0.0000    0.0083    0.0000
-ENSMUSG00000001138     4.9831    5.3761    5.1055    4.4783    4.5696    4.4782
-ENSMUSG00000001143     5.5133    5.6463    6.1655    6.0378    6.1402    5.6661
-ENSMUSG00000001305    21.6306   24.1587   19.7010   19.1657   13.1051   16.7197
-ENSMUSG00000001674    12.2045   13.7941   12.5095   11.8213    9.6193   11.0575
+gene_id              gene_symbol     A54933    A54934    A54935    A54936    A54937    A54938
+-------------------  ------------  --------  --------  --------  --------  --------  --------
+ENSMUSG00000000544   Gpa33           0.0000    0.0000    0.0121    0.0107    0.0000    0.0000
+ENSMUSG00000000817   Fasl            0.0174    0.0129    0.0342    0.0000    0.0083    0.0000
+ENSMUSG00000001138   Cnnm3           4.9831    5.3761    5.1055    4.4783    4.5696    4.4782
+ENSMUSG00000001143   Lman2l          5.5133    5.6463    6.1655    6.0378    6.1402    5.6661
+ENSMUSG00000001305   Rrp15          21.6306   24.1587   19.7010   19.1657   13.1051   16.7197
+ENSMUSG00000001674   Ddx18          12.2045   13.7941   12.5095   11.8213    9.6193   11.0575
 
 ```r
 head(libs) %>% kable()
@@ -44,20 +52,108 @@ A54938         Karsan Lab Research   ssRNA-Seq       v1                 TIRAP-3 
 
 ```r
 column_to_rownames(expr, var = "gene_id") %>%
+  select(-gene_symbol) %>%
   as.matrix() %>%
   log2() %>%
-  hist(main = "log2(Expression)")
+  hist(main = "log2(Expression)") 
+```
+
+```
+## Warning: Setting row names on a tibble is deprecated.
 ```
 
 ![](expression_analysis_TIRAP_files/figure-html/qc_expression_hist-1.png)<!-- -->
 
+# Proof-of-concept: Expression of cytokines/alarmins (see if it matches with Rawa's previous graph)
+## Reformat data for ggplot2
 
+```r
+# melt data to allow graphing
+## using all data (no filtering for expression levels) to avoid leaving out things that were considered in previous analysis
+library(reshape2)
+```
+
+```
+## 
+## Attaching package: 'reshape2'
+```
+
+```
+## The following object is masked from 'package:tidyr':
+## 
+##     smiths
+```
+
+```r
+expr.melt <- as.data.frame(expr) %>%
+  select(gene_symbol, contains("A54")) %>%
+  melt(id.vars = "gene_symbol", variable.name = "sample", value.name = "expression")
+
+# create a factor for experimental design
+design <- select(libs, library_name, specimen_subset_external_id) %>%
+  rename(specimen = specimen_subset_external_id) %>%
+  mutate(oe = specimen) %>%
+  separate(col = oe, into = "construct", remove = T)
+```
+
+```
+## Warning: Expected 1 pieces. Additional pieces discarded in 6 rows [1, 2, 3,
+## 4, 5, 6].
+```
+
+```r
+expr.melt$construct <- design[match(expr.melt$sample, design$library_name),]$construct
+
+head(expr.melt)
+```
+
+```
+##   gene_symbol sample expression construct
+## 1       Gpa33 A54933     0.0000       MIG
+## 2        Fasl A54933     0.0174       MIG
+## 3       Cnnm3 A54933     4.9831       MIG
+## 4      Lman2l A54933     5.5133       MIG
+## 5       Rrp15 A54933    21.6306       MIG
+## 6       Ddx18 A54933    12.2045       MIG
+```
+
+## Select genes of interest based on Aparna's lab meeting 2019-01-22, slide 9
+(Plus a few extras...)
+
+```r
+genes.of.int <- c("Il1b", "Il6", "Il10", "Il-12", "Tnf", "Ifnb1", "Ifng", "Cxcl10", "Csf2", "Il2ra", "Fasl", "Ifngr1", "Ifngr2", "Il10ra", "Il10rb")
+
+int <- filter(expr.melt, gene_symbol %in% genes.of.int)
+
+summary_int <- group_by(int, gene_symbol, construct) %>%
+  summarise(mean = mean(expression), sd = sd(expression), n = length(expression))
+
+ggplot(summary_int, aes(gene_symbol, mean, fill = construct)) +
+  geom_bar(stat = "identity", colour = "black", width = 0.6, position = "dodge") +
+  geom_errorbar(aes(ymin = mean, ymax = mean+(sd/sqrt(n))), width = 0.3, position=position_dodge(.6)) +
+  scale_y_continuous(expand = c(0,0), limits = c(NA, 100))
+```
+
+![](expression_analysis_TIRAP_files/figure-html/graph_rawas_hits-1.png)<!-- -->
+
+* Ask Aparna: Is the graph from lab meeting a qPCR result or a RNA-seq summary? The trend is same direction for all genes, but expression levels & effect size are very different...
+    - note: The Y axis in lab meeting graph is "Relative Expression", which likely means qPCR
+
+
+# Prep for limma analysis
 ## Processing expression data
 
 ```r
 expr.matrix <- column_to_rownames(expr, var = "gene_id") %>%
+  select(-gene_symbol) %>%
   as.matrix()
+```
 
+```
+## Warning: Setting row names on a tibble is deprecated.
+```
+
+```r
 # filter to 'higher' expressed genes (RPKM >= 0.1 in at least 3 samples)
 thresh <- expr.matrix >= 0.1
 keep <- rowSums(thresh) >= 3
@@ -77,27 +173,14 @@ head(dge.log) %>% kable()
 
                         A54933     A54934     A54935     A54936     A54937     A54938
 -------------------  ---------  ---------  ---------  ---------  ---------  ---------
-ENSMUSG00000001138    4.332841   4.442327   4.372112   4.198099   4.266315   4.165721
-ENSMUSG00000001143    4.478434   4.512944   4.643790   4.628345   4.691753   4.504473
-ENSMUSG00000001305    6.448557   6.608138   6.318156   6.293151   5.784316   6.063883
-ENSMUSG00000001674    5.623415   5.800098   5.663334   5.596478   5.338578   5.467809
-ENSMUSG00000002881    6.100208   5.949362   6.234799   6.483228   6.457639   6.502316
-ENSMUSG00000003134    5.117132   5.155426   5.170972   5.009584   5.294073   5.055743
+ENSMUSG00000001138    3.499360   3.607360   3.553564   3.365813   3.428251   3.337835
+ENSMUSG00000001143    3.644952   3.677976   3.825247   3.796059   3.853685   3.676588
+ENSMUSG00000001305    5.615071   5.773165   5.499626   5.460863   4.946242   5.236002
+ENSMUSG00000001674    4.789931   4.965127   4.844800   4.764190   4.500505   4.639926
+ENSMUSG00000002881    5.266723   5.114390   5.416268   5.650939   5.619563   5.674435
+ENSMUSG00000003134    4.283649   4.320456   4.352434   4.177297   4.456001   4.227860
 
 ## Make design matrix
-
-```r
-# First create a factor for experimental design
-design <- select(libs, library_name, specimen_subset_external_id) %>%
-  rename(specimen = specimen_subset_external_id) %>%
-  mutate(oe = specimen) %>%
-  separate(col = oe, into = "construct", remove = T)
-```
-
-```
-## Warning: Expected 1 pieces. Additional pieces discarded in 6 rows [1, 2, 3,
-## 4, 5, 6].
-```
 
 ```r
 # Model matrix
@@ -138,27 +221,27 @@ head(result, 10)
 
 ```
 ##                       logFC    AveExpr        t      P.Value    adj.P.Val
-## ENSMUSG00000085949 9.564891  0.1627141 54.17258 8.295278e-09 6.258842e-05
-## ENSMUSG00000070645 5.045598 -2.0969323 49.63205 1.350489e-08 6.258842e-05
-## ENSMUSG00000024397 5.038501  4.2717836 44.47621 2.486511e-08 7.682489e-05
-## ENSMUSG00000063157 6.495796 -1.3718337 40.70032 4.073029e-08 7.954061e-05
-## ENSMUSG00000061132 4.778143  2.1812936 39.24476 4.987301e-08 7.954061e-05
-## ENSMUSG00000004730 3.122858  7.7389124 39.02043 5.148815e-08 7.954061e-05
-## ENSMUSG00000070702 7.413949 -0.9127572 30.76617 1.927868e-07 2.463041e-04
-## ENSMUSG00000032356 4.735878 -2.2517927 29.54964 2.411484e-07 2.463041e-04
-## ENSMUSG00000049037 3.597316  7.8630533 28.56586 2.909601e-07 2.463041e-04
-## ENSMUSG00000035356 2.420220  5.1038647 28.41309 2.997407e-07 2.463041e-04
+## ENSMUSG00000085949 9.562982 -0.6690770 53.63890 8.129529e-09 7.748386e-05
+## ENSMUSG00000070645 5.043735 -2.9287002 50.61614 1.124646e-08 7.748386e-05
+## ENSMUSG00000024529 6.018361  1.7048320 48.25675 1.468888e-08 7.748386e-05
+## ENSMUSG00000024397 5.034768  3.4409016 43.67735 2.565371e-08 1.014925e-04
+## ENSMUSG00000063157 6.493909 -2.2036133 40.43854 3.946332e-08 1.024977e-04
+## ENSMUSG00000004730 3.119105  6.9080396 39.89361 4.257178e-08 1.024977e-04
+## ENSMUSG00000001348 4.125753  4.6477775 39.44660 4.533865e-08 1.024977e-04
+## ENSMUSG00000061132 4.774440  1.3503993 38.13689 5.475222e-08 1.083067e-04
+## ENSMUSG00000052188 6.149275 -2.3759303 36.51489 6.979691e-08 1.227262e-04
+## ENSMUSG00000039116 5.618718 -0.7195449 33.64976 1.101471e-07 1.743078e-04
 ##                            B
-## ENSMUSG00000085949 10.191852
-## ENSMUSG00000070645  9.938929
-## ENSMUSG00000024397  9.586995
-## ENSMUSG00000063157  9.273776
-## ENSMUSG00000061132  9.137896
-## ENSMUSG00000004730  9.116125
-## ENSMUSG00000070702  8.125639
-## ENSMUSG00000032356  7.941445
-## ENSMUSG00000049037  7.783544
-## ENSMUSG00000035356  7.758266
+## ENSMUSG00000085949 10.271366
+## ENSMUSG00000070645 10.100870
+## ENSMUSG00000024529  9.952354
+## ENSMUSG00000024397  9.618134
+## ENSMUSG00000063157  9.337758
+## ENSMUSG00000004730  9.286416
+## ENSMUSG00000001348  9.243329
+## ENSMUSG00000061132  9.111823
+## ENSMUSG00000052188  8.937331
+## ENSMUSG00000039116  8.593782
 ```
 
 
@@ -186,9 +269,9 @@ summary(signif)
 
 ```
 ##    (Intercept) constructTIRAP
-## -1         471           1163
-## 0          928           6676
-## 1         7870           1430
+## -1        1705           2245
+## 0         1343          11145
+## 1        12777           2435
 ```
 
 ```r
@@ -251,27 +334,20 @@ down_result <- result[which(rownames(result) %in% down$gene),] %>%
 down.log.expr <- dge.log[which(rownames(dge.log) %in% down_result$gene),]
 down.scaled <- t(down.log.expr) %>% scale() %>% (t)
 
-# biomart gene name conversion to mgi symbol
-library(biomaRt)
-
-mouse <- useMart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "mmusculus_gene_ensembl")
-genenames_up <- getBM(attributes = c("ensembl_gene_id", "mgi_symbol"), filters = "ensembl_gene_id", values = rownames(up.scaled), mart = mouse)
-genenames_down <- getBM(attributes = c("ensembl_gene_id", "mgi_symbol"), filters = "ensembl_gene_id", values = rownames(down.scaled), mart = mouse)
-
+# convert to gene symbol using Jenny's pre-derived gene_symbol column
 up.scaled <- as.data.frame(up.scaled) %>%
   rownames_to_column(var = "gene_id")
 down.scaled <- as.data.frame(down.scaled) %>%
   rownames_to_column(var = "gene_id")
 
-up.scaled$gene <- genenames_up[match(up.scaled$gene_id, genenames_up$ensembl_gene_id),]$mgi_symbol
-down.scaled$gene <- genenames_down[match(down.scaled$gene_id, genenames_down$ensembl_gene_id),]$mgi_symbol
+up.scaled$gene_symbol <- expr[match(up.scaled$gene_id, expr$gene_id),]$gene_symbol
+down.scaled$gene_symbol <- expr[match(down.scaled$gene_id, expr$gene_id),]$gene_symbol
 
 up.scaled <- dplyr::select(up.scaled, -gene_id) %>%
-  column_to_rownames(var = "gene")
+  column_to_rownames(var = "gene_symbol")
 
 down.scaled <- dplyr::select(down.scaled, -gene_id) %>%
-  filter(!is.na(gene)) %>%
-  column_to_rownames(var = "gene")
+  column_to_rownames(var = "gene_symbol")
 
 scaled.50.50 <- rbind(up.scaled, down.scaled)
 ```
@@ -297,6 +373,8 @@ pheatmap(scaled.50.50,
 ## Convert to human gene names  
 
 ```r
+library(biomaRt)
+mouse <- useMart("ENSEMBL_MART_ENSEMBL", "mmusculus_gene_ensembl")
 human <- useMart("ENSEMBL_MART_ENSEMBL", "hsapiens_gene_ensembl")
 
 orthologs <- getBM(attributes = c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene"), filters = "ensembl_gene_id", values = rownames(expr.matrix.keep), mart = mouse) # using "higher" expressed genes only, in expr.matrix.keep
@@ -365,9 +443,3 @@ write(x = groups, file = "./TIRAP/GSEA_fromLimma/Phenotypes_TIRAP.cls", ncolumns
 ```
 
 > Ready to do GSEA and EnrichmentMap analysis
-
-
-
-
-
-

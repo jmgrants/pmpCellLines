@@ -60,11 +60,25 @@ expr.melt$construct <- design[match(expr.melt$sample, design$library_name),]$con
 head(expr.melt)
 ```
 
-## Select genes of interest (based on Aparna's lab meeting 2019-01-22)
-```{r}
-genes.of.int <- c("Il1b", "Il6", "Il10", "Il-12", "Tnf", "Ifnb1", "Ifng", "Cxcl10", "Csf2", "")
+## Select genes of interest based on Aparna's lab meeting 2019-01-22, slide 9
+(Plus a few extras...)
+```{r graph_rawas_hits, fig.width=8, fig.height=3}
+genes.of.int <- c("Il1b", "Il6", "Il10", "Il-12", "Tnf", "Ifnb1", "Ifng", "Cxcl10", "Csf2", "Il2ra", "Fasl", "Ifngr1", "Ifngr2", "Il10ra", "Il10rb")
+
+int <- filter(expr.melt, gene_symbol %in% genes.of.int)
+
+summary_int <- group_by(int, gene_symbol, construct) %>%
+  summarise(mean = mean(expression), sd = sd(expression), n = length(expression))
+
+ggplot(summary_int, aes(gene_symbol, mean, fill = construct)) +
+  geom_bar(stat = "identity", colour = "black", width = 0.6, position = "dodge") +
+  geom_errorbar(aes(ymin = mean, ymax = mean+(sd/sqrt(n))), width = 0.3, position=position_dodge(.6)) +
+  scale_y_continuous(expand = c(0,0), limits = c(NA, 100))
+  
 ```
 
+* Ask Aparna: Is the graph from lab meeting a qPCR result or a RNA-seq summary? The trend is same direction for all genes, but expression levels & effect size are very different...
+    - note: The Y axis in lab meeting graph is "Relative Expression", which likely means qPCR
 
 
 # Prep for limma analysis
@@ -183,27 +197,20 @@ down_result <- result[which(rownames(result) %in% down$gene),] %>%
 down.log.expr <- dge.log[which(rownames(dge.log) %in% down_result$gene),]
 down.scaled <- t(down.log.expr) %>% scale() %>% (t)
 
-# biomart gene name conversion to mgi symbol
-library(biomaRt)
-
-mouse <- useMart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "mmusculus_gene_ensembl")
-genenames_up <- getBM(attributes = c("ensembl_gene_id", "mgi_symbol"), filters = "ensembl_gene_id", values = rownames(up.scaled), mart = mouse)
-genenames_down <- getBM(attributes = c("ensembl_gene_id", "mgi_symbol"), filters = "ensembl_gene_id", values = rownames(down.scaled), mart = mouse)
-
+# convert to gene symbol using Jenny's pre-derived gene_symbol column
 up.scaled <- as.data.frame(up.scaled) %>%
   rownames_to_column(var = "gene_id")
 down.scaled <- as.data.frame(down.scaled) %>%
   rownames_to_column(var = "gene_id")
 
-up.scaled$gene <- genenames_up[match(up.scaled$gene_id, genenames_up$ensembl_gene_id),]$mgi_symbol
-down.scaled$gene <- genenames_down[match(down.scaled$gene_id, genenames_down$ensembl_gene_id),]$mgi_symbol
+up.scaled$gene_symbol <- expr[match(up.scaled$gene_id, expr$gene_id),]$gene_symbol
+down.scaled$gene_symbol <- expr[match(down.scaled$gene_id, expr$gene_id),]$gene_symbol
 
 up.scaled <- dplyr::select(up.scaled, -gene_id) %>%
-  column_to_rownames(var = "gene")
+  column_to_rownames(var = "gene_symbol")
 
 down.scaled <- dplyr::select(down.scaled, -gene_id) %>%
-  filter(!is.na(gene)) %>%
-  column_to_rownames(var = "gene")
+  column_to_rownames(var = "gene_symbol")
 
 scaled.50.50 <- rbind(up.scaled, down.scaled)
 ```
@@ -225,6 +232,8 @@ pheatmap(scaled.50.50,
 # Prepare data for GSEA analysis (expression analysis)
 ## Convert to human gene names  
 ```{r}
+library(biomaRt)
+mouse <- useMart("ENSEMBL_MART_ENSEMBL", "mmusculus_gene_ensembl")
 human <- useMart("ENSEMBL_MART_ENSEMBL", "hsapiens_gene_ensembl")
 
 orthologs <- getBM(attributes = c("ensembl_gene_id", "hsapiens_homolog_ensembl_gene"), filters = "ensembl_gene_id", values = rownames(expr.matrix.keep), mart = mouse) # using "higher" expressed genes only, in expr.matrix.keep

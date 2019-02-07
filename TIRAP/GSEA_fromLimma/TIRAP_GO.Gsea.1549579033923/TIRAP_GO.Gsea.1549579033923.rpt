@@ -1,0 +1,33 @@
+producer_class	xtools.gsea.Gsea
+producer_timestamp	1549579033923
+param	collapse	false
+param	cls	\\isaac\klabanalysis\jgrants\pmpCellLines\TIRAP\GSEA_fromLimma\Phenotypes_TIRAP.cls#TIRAP_versus_MIG
+param	plot_top_x	20
+param	norm	meandiv
+param	save_rnd_lists	false
+param	median	false
+param	num	100
+param	scoring_scheme	weighted
+param	make_sets	true
+param	mode	Max_probe
+param	gmx	gseaftp.broadinstitute.org://pub/gsea/gene_sets_final/c5.all.v6.2.symbols.gmt
+param	gui	false
+param	metric	Signal2Noise
+param	rpt_label	TIRAP_GO
+param	help	false
+param	order	descending
+param	out	C:\Users\jgrants\gsea_home\output\feb07
+param	create_svgs	false
+param	permute	gene_set
+param	rnd_type	no_balance
+param	set_min	15
+param	include_only_symbols	true
+param	sort	real
+param	create_gcts	false
+param	rnd_seed	timestamp
+param	nperm	1000
+param	zip_report	false
+param	set_max	500
+param	res	\\isaac\klabanalysis\jgrants\pmpCellLines\TIRAP\GSEA_fromLimma\TIRAP_exprSet_filteredForHighExpression.txt
+
+file	C:\Users\jgrants\gsea_home\output\feb07\TIRAP_GO.Gsea.1549579033923\index.html
