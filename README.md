@@ -8,11 +8,13 @@ The purpose of this repository is to explore the PMP cell line data using the sk
 
 1. Kate's miR SPG data: folder = Kate
 2. FBXO11 knockdown: folder = FBXO11
+3. TIRAP overexpression: folder = TIRAP
 
 
 ## Workflow
 * _exploration_: Identify cell line samples of interest, develop hypotheses 
-    - save: `expr` (mRNA-seq tpms) and `libs` (metadata)  
+    - save: `expr` (mRNA-seq as tpm values unless otherwise stated) and `libs` (metadata)  
+    - note: in TIRAP, `expr` values are RPKM
 
 * _expression_analysis_: Starting from saved `expr` and `libs`, perform DEseq2 analysis  
     - save: Results of DEseq comparisons for each condition (condition/ctrl), as `.csv` files in `DEseq` folder  
