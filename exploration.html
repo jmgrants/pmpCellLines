@@ -136,6 +136,11 @@ $(document).ready(function () {
 <li><a href="#select-only-libraries-of-interest-1">Select only libraries of interest</a></li>
 <li><a href="#save-rdata-files-for-downstream-analysis-1">Save Rdata files for downstream analysis</a></li>
 </ul></li>
+<li><a href="#tirap-overexpression-mouse-bm">TIRAP overexpression (mouse BM)</a><ul>
+<li><a href="#use-amlpmpdata-package-to-identify-path-to-files">Use amlpmpdata package to identify path to files</a></li>
+<li><a href="#load-jennys-pre-calculated-rpkm-values">Load Jenny’s pre-calculated RPKM values</a></li>
+<li><a href="#save-metadata">Save metadata</a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -737,6 +742,209 @@ kable(head(expr))</code></pre>
 <h3>Save Rdata files for downstream analysis</h3>
 <pre class="r"><code>save(expr, file = &quot;./FBXO11/expr.RData&quot;)
 save(libs, file = &quot;./FBXO11/libs.RData&quot;)</code></pre>
+</div>
+</div>
+<div id="tirap-overexpression-mouse-bm" class="section level2">
+<h2>TIRAP overexpression (mouse BM)</h2>
+<pre class="r"><code>tirap &lt;- filter(cells, grepl(pattern = &quot;Rawa&quot;, x = cells$meta))
+
+kable(tirap)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">patient_external_id</th>
+<th align="left">specimen_external_id</th>
+<th align="left">meta</th>
+<th align="left">is_patient</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">MIG</td>
+<td align="left">MIG-1</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 1 of vector control”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">MIG</td>
+<td align="left">MIG-2</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 2 of vector control”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">MIG</td>
+<td align="left">MIG-3</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 3 of vector control”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">TIRAP</td>
+<td align="left">TIRAP-1</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 1 of TIRAP-overexpressing experimental group”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="odd">
+<td align="left">TIRAP</td>
+<td align="left">TIRAP-2</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 2 of TIRAP-overexpressing experimental group”}</td>
+<td align="left">FALSE</td>
+</tr>
+<tr class="even">
+<td align="left">TIRAP</td>
+<td align="left">TIRAP-3</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 3 of TIRAP-overexpressing experimental group”}</td>
+<td align="left">FALSE</td>
+</tr>
+</tbody>
+</table>
+<div id="use-amlpmpdata-package-to-identify-path-to-files" class="section level3">
+<h3>Use amlpmpdata package to identify path to files</h3>
+<pre class="r"><code># merge library names to tirap table
+libraries &lt;- amlpmpdata::db_libraries
+
+tirap$library &lt;- libraries[match(tirap$specimen_external_id, libraries$specimen_subset_external_id),]$library_name
+
+# merge path to tirap table  
+paths &lt;- amlpmpdata::db_paths
+
+tirap$path &lt;- paths[match(tirap$library, paths$library),]$path
+
+kable(tirap)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">patient_external_id</th>
+<th align="left">specimen_external_id</th>
+<th align="left">meta</th>
+<th align="left">is_patient</th>
+<th align="left">library</th>
+<th align="left">path</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">MIG</td>
+<td align="left">MIG-1</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 1 of vector control”}</td>
+<td align="left">FALSE</td>
+<td align="left">A54933</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">MIG</td>
+<td align="left">MIG-2</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 2 of vector control”}</td>
+<td align="left">FALSE</td>
+<td align="left">A54934</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">MIG</td>
+<td align="left">MIG-3</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 3 of vector control”}</td>
+<td align="left">FALSE</td>
+<td align="left">A54935</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">TIRAP</td>
+<td align="left">TIRAP-1</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 1 of TIRAP-overexpressing experimental group”}</td>
+<td align="left">FALSE</td>
+<td align="left">A54936</td>
+<td align="left">NA</td>
+</tr>
+<tr class="odd">
+<td align="left">TIRAP</td>
+<td align="left">TIRAP-2</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 2 of TIRAP-overexpressing experimental group”}</td>
+<td align="left">FALSE</td>
+<td align="left">A54937</td>
+<td align="left">NA</td>
+</tr>
+<tr class="even">
+<td align="left">TIRAP</td>
+<td align="left">TIRAP-3</td>
+<td align="left">{“description”: “Rawa Ibrahim mouse bone marrow cells. Biological replicate 3 of TIRAP-overexpressing experimental group”}</td>
+<td align="left">FALSE</td>
+<td align="left">A54938</td>
+<td align="left">NA</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Paths are not available in this data package. Therefore I searched JIRA tickets and found Jenny’s RPKM data for these samples, and saved to <code>TIRAP</code> / <code>data</code>.</p>
+</blockquote>
+<ul>
+<li>JIRA ticket: <a href="https://www.bcgsc.ca/jira/browse/KARSANBIO-412" class="uri">https://www.bcgsc.ca/jira/browse/KARSANBIO-412</a></li>
+</ul>
+</div>
+<div id="load-jennys-pre-calculated-rpkm-values" class="section level3">
+<h3>Load Jenny’s pre-calculated RPKM values</h3>
+<pre class="r"><code>expr &lt;- read_tsv(file = &quot;./TIRAP/data/RPKM.tsv&quot;, col_names = T)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   gene_id = col_character(),
+##   chromosome = col_integer(),
+##   start = col_integer(),
+##   end = col_integer(),
+##   strand = col_character(),
+##   gene_symbol = col_character(),
+##   biotype = col_character(),
+##   gene_description = col_character(),
+##   `A54933_normalized_coverage_(RPKM)` = col_double(),
+##   `A54934_normalized_coverage_(RPKM)` = col_double(),
+##   `A54935_normalized_coverage_(RPKM)` = col_double(),
+##   `A54936_normalized_coverage_(RPKM)` = col_double(),
+##   `A54937_normalized_coverage_(RPKM)` = col_double(),
+##   `A54938_normalized_coverage_(RPKM)` = col_double()
+## )</code></pre>
+<pre><code>## Warning in rbind(names(probs), probs_f): number of columns of result is not
+## a multiple of vector length (arg 1)</code></pre>
+<pre><code>## Warning: 3141 parsing failures.
+## row # A tibble: 5 x 5 col     row col        expected   actual     file                    expected   &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;      &lt;chr&gt;                   actual 1 35075 chromosome an integer GL456210.1 './TIRAP/data/RPKM.tsv' file 2 35076 chromosome an integer GL456210.1 './TIRAP/data/RPKM.tsv' row 3 35077 chromosome an integer GL456210.1 './TIRAP/data/RPKM.tsv' col 4 35078 chromosome an integer GL456210.1 './TIRAP/data/RPKM.tsv' expected 5 35079 chromosome an integer GL456210.1 './TIRAP/data/RPKM.tsv'
+## ... ................. ... ................................................................ ........ ................................................................ ...... ................................................................ .... ................................................................ ... ................................................................ ... ................................................................ ........ ................................................................
+## See problems(...) for more details.</code></pre>
+<pre class="r"><code>dim(expr) # should be 38215 rows according to RPKM.tsv</code></pre>
+<pre><code>## [1] 38215    14</code></pre>
+<pre class="r"><code># fix column names for samples
+cols &lt;- data.frame(cols_names = colnames(expr[,9:ncol(expr)])) %&gt;%
+  separate(col = cols_names, into = &quot;name&quot;, remove = T)</code></pre>
+<pre><code>## Warning: Expected 1 pieces. Additional pieces discarded in 6 rows [1, 2, 3,
+## 4, 5, 6].</code></pre>
+<pre class="r"><code>cols2 &lt;- data.frame(name = colnames(expr[,1:8]))
+cols3 &lt;- rbind(cols2, cols)
+
+colnames(expr) &lt;- cols3$name
+
+# get expression matrix only
+expr &lt;- dplyr::select(expr, gene_id, gene_symbol, contains(&quot;A54&quot;))
+save(expr, file = &quot;./TIRAP/expr.rda&quot;)</code></pre>
+</div>
+<div id="save-metadata" class="section level3">
+<h3>Save metadata</h3>
+<pre class="r"><code>libs &lt;- amlpmpdata::db_libraries[match(tirap$specimen_external_id, amlpmpdata::db_libraries$specimen_subset_external_id),] 
+save(libs, file = &quot;./TIRAP/libs.rda&quot;)</code></pre>
+<blockquote>
+<p>Experimental design: TIRAP overexpression data</p>
+</blockquote>
+<ul>
+<li>Bone marrow transfected with TIRAP overexpression vector or MIG empty vector, transplanted to n = 3 recipient mice</li>
+<li>Compare gene expression in TIRAP overexpression vs. empty vector</li>
+</ul>
+<blockquote>
+<p>Hypothesis:</p>
+</blockquote>
+<ul>
+<li>TIRAP overexpression causes gene expression changes that account for the bone marrow failure phenotype observed in these mice</li>
+</ul>
+<blockquote>
+<p>Aims:</p>
+</blockquote>
+<ul>
+<li>To identify differentially expressed genes in TIRAP-oe vs. Control (Limma)</li>
+<li>To identify up- and downregulated pathways and processes in TIRAP-oe vs. Control (GSEA, EnrichmentMap)</li>
+</ul>
 </div>
 </div>
 

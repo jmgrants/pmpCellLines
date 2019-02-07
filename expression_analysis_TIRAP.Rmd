@@ -23,6 +23,7 @@ library(knitr)
 # Expression data and design
 ```{r}
 load("./TIRAP/expr.rda")
+dim(expr) # should be 38215 rows according to RPKM.tsv
 load("./TIRAP/libs.rda")
 
 head(expr) %>% kable()
@@ -32,15 +33,45 @@ head(libs) %>% kable()
 ## QC plot
 ```{r qc_expression_hist}
 column_to_rownames(expr, var = "gene_id") %>%
+  select(-gene_symbol) %>%
   as.matrix() %>%
   log2() %>%
-  hist(main = "log2(Expression)")
+  hist(main = "log2(Expression)") 
+```
+
+# Proof-of-concept: Expression of cytokines/alarmins (see if it matches with Rawa's previous graph)
+## Reformat data for ggplot2
+```{r}
+# melt data to allow graphing
+## using all data (no filtering for expression levels) to avoid leaving out things that were considered in previous analysis
+library(reshape2)
+expr.melt <- as.data.frame(expr) %>%
+  select(gene_symbol, contains("A54")) %>%
+  melt(id.vars = "gene_symbol", variable.name = "sample", value.name = "expression")
+
+# create a factor for experimental design
+design <- select(libs, library_name, specimen_subset_external_id) %>%
+  rename(specimen = specimen_subset_external_id) %>%
+  mutate(oe = specimen) %>%
+  separate(col = oe, into = "construct", remove = T)
+
+expr.melt$construct <- design[match(expr.melt$sample, design$library_name),]$construct
+
+head(expr.melt)
+```
+
+## Select genes of interest (based on Aparna's lab meeting 2019-01-22)
+```{r}
+genes.of.int <- c("Il1b", "Il6", "Il10", "Il-12", "Tnf", "Ifnb1", "Ifng", "Cxcl10", "Csf2", "")
 ```
 
 
+
+# Prep for limma analysis
 ## Processing expression data
 ```{r}
 expr.matrix <- column_to_rownames(expr, var = "gene_id") %>%
+  select(-gene_symbol) %>%
   as.matrix()
 
 # filter to 'higher' expressed genes (RPKM >= 0.1 in at least 3 samples)
@@ -62,12 +93,6 @@ head(dge.log) %>% kable()
 
 ## Make design matrix
 ```{r}
-# First create a factor for experimental design
-design <- select(libs, library_name, specimen_subset_external_id) %>%
-  rename(specimen = specimen_subset_external_id) %>%
-  mutate(oe = specimen) %>%
-  separate(col = oe, into = "construct", remove = T)
-
 # Model matrix
 designMatrix <- model.matrix(~construct, design)
 
@@ -249,9 +274,3 @@ write(x = groups, file = "./TIRAP/GSEA_fromLimma/Phenotypes_TIRAP.cls", ncolumns
 ```
 
 > Ready to do GSEA and EnrichmentMap analysis
-
-
-
-
-
-

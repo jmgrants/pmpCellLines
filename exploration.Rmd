@@ -204,7 +204,8 @@ kable(tirap)
 
 ### Load Jenny's pre-calculated RPKM values
 ```{r load_RPKM}
-expr <- read.table("./TIRAP/data/RPKM.tsv", sep = "\t", header = T)
+expr <- read_tsv(file = "./TIRAP/data/RPKM.tsv", col_names = T)
+dim(expr) # should be 38215 rows according to RPKM.tsv
 
 # fix column names for samples
 cols <- data.frame(cols_names = colnames(expr[,9:ncol(expr)])) %>%
@@ -215,7 +216,7 @@ cols3 <- rbind(cols2, cols)
 colnames(expr) <- cols3$name
 
 # get expression matrix only
-expr <- select(expr, gene_id, contains("A54"))
+expr <- dplyr::select(expr, gene_id, gene_symbol, contains("A54"))
 save(expr, file = "./TIRAP/expr.rda")
 ```
 
