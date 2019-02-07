@@ -120,9 +120,13 @@ kable(designMatrix)
 fit <- lmFit(dge.log, design = designMatrix)
 fitEb <- eBayes(fit)
 
-result <- topTable(fitEb, number = Inf)
+result <- topTable(fitEb, number = Inf) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id")
 
-head(result, 10)
+result$gene_symbol <- expr[match(result$gene_id, expr$gene_id),]$gene_symbol # add gene symbols from Jenny's RPKM table of expr
+
+head(result, 10) %>% kable()
 ```
 
 ```{r}
@@ -166,67 +170,6 @@ pheatmap(hits.scaled,
          annotation_col = anno.frame, 
          color = heatmap_pallete)
 ```
-
-## Heatmap of top 50 up and top 50 down genes with names
-
-Prep for making heatmap with gene names:  
-```{r}
-# top upregulated
-up <- as.data.frame(signif) %>%
-  rownames_to_column(var = "gene") %>%
-  filter(constructTIRAP > 0)
-
-up_result <- result[which(rownames(result) %in% up$gene),] %>%
-  rownames_to_column(var = "gene") %>%
-  arrange(adj.P.Val) %>%
-  head(50)
-
-up.log.expr <- dge.log[which(rownames(dge.log) %in% up_result$gene),]
-up.scaled <- t(up.log.expr) %>% scale() %>% (t)
-
-# top downregulated
-down <- as.data.frame(signif) %>%
-  rownames_to_column(var = "gene") %>%
-  filter(constructTIRAP < 0)
-
-down_result <- result[which(rownames(result) %in% down$gene),] %>%
-  rownames_to_column(var = "gene") %>%
-  arrange(adj.P.Val) %>%
-  head(50)
-
-down.log.expr <- dge.log[which(rownames(dge.log) %in% down_result$gene),]
-down.scaled <- t(down.log.expr) %>% scale() %>% (t)
-
-# convert to gene symbol using Jenny's pre-derived gene_symbol column
-up.scaled <- as.data.frame(up.scaled) %>%
-  rownames_to_column(var = "gene_id")
-down.scaled <- as.data.frame(down.scaled) %>%
-  rownames_to_column(var = "gene_id")
-
-up.scaled$gene_symbol <- expr[match(up.scaled$gene_id, expr$gene_id),]$gene_symbol
-down.scaled$gene_symbol <- expr[match(down.scaled$gene_id, expr$gene_id),]$gene_symbol
-
-up.scaled <- dplyr::select(up.scaled, -gene_id) %>%
-  column_to_rownames(var = "gene_symbol")
-
-down.scaled <- dplyr::select(down.scaled, -gene_id) %>%
-  column_to_rownames(var = "gene_symbol")
-
-scaled.50.50 <- rbind(up.scaled, down.scaled)
-```
-
-Draw heatmap:  
-```{r heatmap_top50_up_down, fig.height=16, fig.width = 8}
-pheatmap(scaled.50.50, 
-         cluster_cols = F, 
-         cluster_rows = T, 
-         show_rownames = T, 
-         clustering_method = "ward.D2", 
-         clustering_distance_cols = "euclidean", 
-         annotation_col = anno.frame, 
-         color = heatmap_pallete)
-```
-
 
 
 # Prepare data for GSEA analysis (expression analysis)

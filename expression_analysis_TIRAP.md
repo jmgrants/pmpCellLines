@@ -208,7 +208,9 @@ kable(designMatrix)
 fit <- lmFit(dge.log, design = designMatrix)
 fitEb <- eBayes(fit)
 
-result <- topTable(fitEb, number = Inf)
+result <- topTable(fitEb, number = Inf) %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "gene_id")
 ```
 
 ```
@@ -216,33 +218,25 @@ result <- topTable(fitEb, number = Inf)
 ```
 
 ```r
-head(result, 10)
+result$gene_symbol <- expr[match(result$gene_id, expr$gene_id),]$gene_symbol # add gene symbols from Jenny's RPKM table of expr
+
+head(result, 10) %>% kable()
 ```
 
-```
-##                       logFC    AveExpr        t      P.Value    adj.P.Val
-## ENSMUSG00000085949 9.562982 -0.6690770 53.63890 8.129529e-09 7.748386e-05
-## ENSMUSG00000070645 5.043735 -2.9287002 50.61614 1.124646e-08 7.748386e-05
-## ENSMUSG00000024529 6.018361  1.7048320 48.25675 1.468888e-08 7.748386e-05
-## ENSMUSG00000024397 5.034768  3.4409016 43.67735 2.565371e-08 1.014925e-04
-## ENSMUSG00000063157 6.493909 -2.2036133 40.43854 3.946332e-08 1.024977e-04
-## ENSMUSG00000004730 3.119105  6.9080396 39.89361 4.257178e-08 1.024977e-04
-## ENSMUSG00000001348 4.125753  4.6477775 39.44660 4.533865e-08 1.024977e-04
-## ENSMUSG00000061132 4.774440  1.3503993 38.13689 5.475222e-08 1.083067e-04
-## ENSMUSG00000052188 6.149275 -2.3759303 36.51489 6.979691e-08 1.227262e-04
-## ENSMUSG00000039116 5.618718 -0.7195449 33.64976 1.101471e-07 1.743078e-04
-##                            B
-## ENSMUSG00000085949 10.271366
-## ENSMUSG00000070645 10.100870
-## ENSMUSG00000024529  9.952354
-## ENSMUSG00000024397  9.618134
-## ENSMUSG00000063157  9.337758
-## ENSMUSG00000004730  9.286416
-## ENSMUSG00000001348  9.243329
-## ENSMUSG00000061132  9.111823
-## ENSMUSG00000052188  8.937331
-## ENSMUSG00000039116  8.593782
-```
+
+
+gene_id                  logFC      AveExpr          t   P.Value   adj.P.Val           B  gene_symbol 
+-------------------  ---------  -----------  ---------  --------  ----------  ----------  ------------
+ENSMUSG00000085949    9.562982   -0.6690770   53.63890     0e+00   0.0000775   10.271366  Gm14275     
+ENSMUSG00000070645    5.043735   -2.9287002   50.61614     0e+00   0.0000775   10.100870  Ren1        
+ENSMUSG00000024529    6.018361    1.7048320   48.25675     0e+00   0.0000775    9.952354  Lox         
+ENSMUSG00000024397    5.034768    3.4409016   43.67735     0e+00   0.0001015    9.618134  Aif1        
+ENSMUSG00000063157    6.493909   -2.2036133   40.43854     0e+00   0.0001025    9.337758  Csn2        
+ENSMUSG00000004730    3.119105    6.9080396   39.89361     0e+00   0.0001025    9.286416  Emr1        
+ENSMUSG00000001348    4.125753    4.6477775   39.44660     0e+00   0.0001025    9.243329  Acp5        
+ENSMUSG00000061132    4.774440    1.3503993   38.13689     1e-07   0.0001083    9.111823  Blnk        
+ENSMUSG00000052188    6.149275   -2.3759303   36.51489     1e-07   0.0001227    8.937331  Gm14964     
+ENSMUSG00000039116    5.618718   -0.7195449   33.64976     1e-07   0.0001743    8.593782  Gpr126      
 
 
 ```r
@@ -302,71 +296,6 @@ pheatmap(hits.scaled,
 ```
 
 ![](expression_analysis_TIRAP_files/figure-html/heatmap_DE_genes-1.png)<!-- -->
-
-## Heatmap of top 50 up and top 50 down genes with names
-
-Prep for making heatmap with gene names:  
-
-```r
-# top upregulated
-up <- as.data.frame(signif) %>%
-  rownames_to_column(var = "gene") %>%
-  filter(constructTIRAP > 0)
-
-up_result <- result[which(rownames(result) %in% up$gene),] %>%
-  rownames_to_column(var = "gene") %>%
-  arrange(adj.P.Val) %>%
-  head(50)
-
-up.log.expr <- dge.log[which(rownames(dge.log) %in% up_result$gene),]
-up.scaled <- t(up.log.expr) %>% scale() %>% (t)
-
-# top downregulated
-down <- as.data.frame(signif) %>%
-  rownames_to_column(var = "gene") %>%
-  filter(constructTIRAP < 0)
-
-down_result <- result[which(rownames(result) %in% down$gene),] %>%
-  rownames_to_column(var = "gene") %>%
-  arrange(adj.P.Val) %>%
-  head(50)
-
-down.log.expr <- dge.log[which(rownames(dge.log) %in% down_result$gene),]
-down.scaled <- t(down.log.expr) %>% scale() %>% (t)
-
-# convert to gene symbol using Jenny's pre-derived gene_symbol column
-up.scaled <- as.data.frame(up.scaled) %>%
-  rownames_to_column(var = "gene_id")
-down.scaled <- as.data.frame(down.scaled) %>%
-  rownames_to_column(var = "gene_id")
-
-up.scaled$gene_symbol <- expr[match(up.scaled$gene_id, expr$gene_id),]$gene_symbol
-down.scaled$gene_symbol <- expr[match(down.scaled$gene_id, expr$gene_id),]$gene_symbol
-
-up.scaled <- dplyr::select(up.scaled, -gene_id) %>%
-  column_to_rownames(var = "gene_symbol")
-
-down.scaled <- dplyr::select(down.scaled, -gene_id) %>%
-  column_to_rownames(var = "gene_symbol")
-
-scaled.50.50 <- rbind(up.scaled, down.scaled)
-```
-
-Draw heatmap:  
-
-```r
-pheatmap(scaled.50.50, 
-         cluster_cols = F, 
-         cluster_rows = T, 
-         show_rownames = T, 
-         clustering_method = "ward.D2", 
-         clustering_distance_cols = "euclidean", 
-         annotation_col = anno.frame, 
-         color = heatmap_pallete)
-```
-
-![](expression_analysis_TIRAP_files/figure-html/heatmap_top50_up_down-1.png)<!-- -->
-
 
 
 # Prepare data for GSEA analysis (expression analysis)
