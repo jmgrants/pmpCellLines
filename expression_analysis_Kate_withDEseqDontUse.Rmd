@@ -176,3 +176,98 @@ summary(testResults)
 
 
 
+# DE-seq  (DO NOT USE!)
+
+> As I determined in the FBXO11 expression analaysis that Limma analysis is better powered to analyzing RNA-seq data with multiple gorups, I performed Limma instead (added above) and will proceed with those results.
+
+```{r make_deseq}
+library(DESeq2)
+design.table <- select(libs, library_name, SPG_target) %>%
+  column_to_rownames(var = "library_name")
+
+expr.matrix <- column_to_rownames(expr, var = "Name") %>%
+  select(rownames(design.table)) %>% # put columns in same order as the design matrix
+  as.matrix()
+
+# filter to "highly expressed" genes
+thresh <- expr.matrix >= 1
+keep <- rowSums(thresh) >= 2 # keep rows where there are > 2 samples with tpm > 1
+
+expr.matrix.keep <- expr.matrix[keep,]
+
+# convert to integers for DEseq
+int.matrix.keep <- round(expr.matrix.keep, digits = 0)
+
+dds <- DESeqDataSetFromMatrix(countData = int.matrix.keep, colData = design.table, design = ~SPG_target)
+
+res <- DESeq(dds)
+```
+
+
+### Summarise results by each SPG group  
+
+#### miR-143 vs. ctrl  
+```{r results_143}
+resultsNames(res)
+
+result.pair <- results(res, contrast = c("SPG_target", "miR.143", "ctrl")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair[which(result.pair$padj < 0.05),]))
+
+write.csv(x = result.pair, file = "./Kate/DEseq/miR143_vs_ctrl.csv")
+```
+
+```{r miR143_volcano}
+# cutoffs: padj < 0.05, |FC| > 2
+dat <- read.csv("./Kate/DEseq/miR143_vs_ctrl.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.05), 
+         Signif_delta = abs(log2FoldChange) > log2(2),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+
+
+
+#### miR-X vs ctrl  
+```{r results_X}
+result.pair <- results(res, contrast = c("SPG_target", "miR.X", "ctrl")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair[which(result.pair$padj < 0.05),]))
+
+write.csv(x = result.pair, file = "./Kate/DEseq/miRX_vs_ctrl.csv")
+```
+
+```{r miRX_volcano}
+# cutoffs: padj < 0.05, |FC| > 2
+dat <- read.csv("./Kate/DEseq/miRX_vs_ctrl.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.05), 
+         Signif_delta = abs(log2FoldChange) > log2(2),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+
+
+#### Both vs ctrl  
+```{r results_original_spg}
+result.pair <- results(res, contrast = c("SPG_target", "both", "ctrl")) # contrast: the factor, then numerator, then denominator
+
+kable(head(result.pair, 20)) # all p-values = 1, why??? Maybe the SPG didn't work to knock anything down? Maybe there was an outlier sample? ASK
+
+write.csv(x = result.pair, file = "./Kate/DEseq/originalSPG_vs_ctrl.csv")
+```
+
+```{r orig_spg_volcano}
+# cutoffs: padj < 0.05, |FC| > 2
+dat <- read.csv("./Kate/DEseq/originalSPG_vs_ctrl.csv") %>%
+  mutate(Signif_p = -log10(padj) > -log10(0.05), 
+         Signif_delta = abs(log2FoldChange) > log2(2),
+         Signif = Signif_p == TRUE & Signif_delta == TRUE)
+
+ggplot(dat, aes(log2FoldChange, -log10(padj))) +
+  geom_point(aes(colour = Signif))
+```
+

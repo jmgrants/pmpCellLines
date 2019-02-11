@@ -1,12 +1,18 @@
-# Expression analysis for Kate's RNA-seq data
-Jennifer Grants  
-1/9/2019  
+---
+title: "Expression analysis for Kate's RNA-seq data"
+author: "Jennifer Grants"
+date: "1/9/2019"
+output:
+  html_document:
+    keep_md: true
+    toc: true
+---
 
 
 
 
 
-## Load saved data   
+# Data and design  
 `expr` is mRNA-seq TPM values, `libs` is metadata
 
 ```r
@@ -18,8 +24,8 @@ load("./Kate/libs.RData")
 ```r
 libs$SPG_target <- ifelse(test = grepl(pattern = "GFP", x = libs$specimen_subset_external_id), yes = "ctrl", no = 
                                        ifelse(test = grepl(pattern = "OR", x = libs$specimen_subset_external_id), yes = "both", no =
-                                                             ifelse(test = grepl(pattern = "143fix", x = libs$specimen_subset_external_id), yes = "miR-143", no = 
-                                                                      ifelse(test = grepl(pattern = "Xfix", x = libs$specimen_subset_external_id), yes = "miR-X", no = "none"))))
+                                                             ifelse(test = grepl(pattern = "143fix", x = libs$specimen_subset_external_id), yes = "miR143", no = 
+                                                                      ifelse(test = grepl(pattern = "Xfix", x = libs$specimen_subset_external_id), yes = "miRX", no = "none"))))
 ```
 
 
@@ -39,12 +45,12 @@ A54965         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-GFP
 A54966         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-OR-SPG1                  Cohort 6    {}                TATAAT           both       
 A54967         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-OR-SPG2                  Cohort 6    {}                TGCTGG           both       
 A54968         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-OR-SPG3                  Cohort 6    {}                CCGTCC           both       
-A54969         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-143fixSPG1               Cohort 6    {}                TGACCA           miR-143    
-A54970         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-143fixSPG2               Cohort 6    {}                CTTGTA           miR-143    
-A54971         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-143fixSPG3               Cohort 6    {}                AAGCGA           miR-143    
-A54972         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-XfixSPG1                 Cohort 6    {}                ACTCTC           miR-X      
-A54973         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-XfixSPG2                 Cohort 6    {}                ATACGG           miR-X      
-A54974         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-XfixSPG3                 Cohort 6    {}                CACGAT           miR-X      
+A54969         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-143fixSPG1               Cohort 6    {}                TGACCA           miR143     
+A54970         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-143fixSPG2               Cohort 6    {}                CTTGTA           miR143     
+A54971         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-143fixSPG3               Cohort 6    {}                AAGCGA           miR143     
+A54972         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-XfixSPG1                 Cohort 6    {}                ACTCTC           miRX       
+A54973         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-XfixSPG2                 Cohort 6    {}                ATACGG           miRX       
+A54974         Karsan Lab Research   ssRNA-Seq       v1                 UT-7-XfixSPG3                 Cohort 6    {}                CACGAT           miRX       
 
 ## Quality control checks  
 
@@ -142,21 +148,52 @@ hist(as.matrix(expr.log))
 ASK: Why does this have so many 0 values? Is this normal for RNA-seq?  
 
 
-
-## DE-seq  
-
-```r
-design.table <- select(libs, library_name, SPG_target) %>%
-  column_to_rownames(var = "library_name")
-```
-
-```
-## Warning: Setting row names on a tibble is deprecated.
-```
+# Limma
+## Prep
+### Check order of sample names and colnames in meta/expr
 
 ```r
+order <- libs$library_name
+expr2 <- expr2[,order]
+
+identical(libs$library_name, colnames(expr2))
+```
+
+```
+## [1] TRUE
+```
+
+### Make model matrix from metadata
+
+```r
+libs$SPG_target <- factor(libs$SPG_target, levels = c("ctrl", "miR143", "miRX", "both", "none"))
+designMatrix <- model.matrix(~SPG_target, libs)
+
+head(designMatrix)
+```
+
+```
+##   (Intercept) SPG_targetmiR143 SPG_targetmiRX SPG_targetboth
+## 1           1                0              0              0
+## 2           1                0              0              0
+## 3           1                0              0              0
+## 4           1                0              0              0
+## 5           1                0              0              1
+## 6           1                0              0              1
+##   SPG_targetnone
+## 1              1
+## 2              0
+## 3              0
+## 4              0
+## 5              0
+## 6              0
+```
+
+### Normalization and log transformation
+
+```r
+# convert to matrix
 expr.matrix <- column_to_rownames(expr, var = "Name") %>%
-  select(rownames(design.table)) %>% # put columns in same order as the design matrix
   as.matrix()
 ```
 
@@ -165,198 +202,138 @@ expr.matrix <- column_to_rownames(expr, var = "Name") %>%
 ```
 
 ```r
-# filter to "highly expressed" genes
+# filter out lowly expressed genes (keep: TPM must be >=1 in at least 2 samples)
 thresh <- expr.matrix >= 1
-keep <- rowSums(thresh) >= 2 # keep rows where there are > 2 samples with tpm > 1
+keep <- rowSums(thresh) >=2
 
 expr.matrix.keep <- expr.matrix[keep,]
-
-# convert to integers for DEseq
-int.matrix.keep <- round(expr.matrix.keep, digits = 0)
-
-dds <- DESeqDataSetFromMatrix(countData = int.matrix.keep, colData = design.table, design = ~SPG_target)
+dim(expr.matrix.keep)
 ```
 
 ```
-## converting counts to integer mode
-```
-
-```
-## Warning in DESeqDataSet(se, design = design, ignoreRank): some variables in
-## design formula are characters, converting to factors
+## [1] 49697    13
 ```
 
 ```r
-res <- DESeq(dds)
+# convert to DGE list object and apply Normalization
+dge <- DGEList(expr.matrix.keep)
+
+dge.norm <- calcNormFactors(dge) # using default settings
+head(dge.norm$counts) %>% kable()
 ```
 
-```
-## estimating size factors
-```
-
-```
-## estimating dispersions
-```
-
-```
-## gene-wise dispersion estimates
-```
-
-```
-## mean-dispersion relationship
-```
-
-```
-## final dispersion estimates
-```
-
-```
-## fitting model and testing
-```
-
-
-### Summarise results by each SPG group  
-
-#### miR-143 vs. ctrl  
+                     A54974     A54963     A54964     A54966     A35856     A54971     A54972     A54973     A54967     A54969     A54968     A54965     A54970
+----------------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------
+ENST00000488147    2.870341   4.099234   3.408244   5.851605   1.493135   4.397266   2.983613   3.232376   4.603645   3.418479   4.786116   3.122282   2.779962
+ENST00000494149    2.843703   4.584694   3.668867   5.149174   3.581911   5.183181   4.548439   4.289780   4.472369   3.280912   3.749748   4.034470   3.453580
+ENST00000466557    0.636754   1.047331   0.627367   0.772683   0.451951   1.002096   0.972730   0.467456   0.869204   0.522553   0.523319   0.917518   1.196540
+ENST00000410691    0.000000   2.019690   0.272814   0.000000   1.551503   0.000000   0.000000   0.604689   0.000000   0.000000   0.000000   0.000000   1.230365
+ENST00000491962    1.004452   0.961366   0.655722   0.438947   0.451281   1.401859   0.438300   0.585667   0.000000   0.003700   0.690498   0.815021   0.981639
+ENST00000623083    4.665235   5.128547   5.482258   6.733993   4.948131   5.702608   3.425517   5.127846   6.831190   5.417501   6.663883   5.159887   5.432365
 
 ```r
-resultsNames(res)
+# log2 transform and check results
+dge.log <- cpm(y = dge.norm, log = TRUE, normalized.lib.sizes = FALSE, lib.size = NA) # use the cpm function to log transform, but set other parameters to FALSE/NA to avoid taking "per million" since my values are already in TPM
+
+head(dge.log) %>% kable()
+```
+
+                     A54974     A54963     A54964     A54966     A35856     A54971     A54972     A54973     A54967     A54969     A54968     A54965     A54970
+----------------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------  ---------
+ENST00000488147    2.303382   2.630731   2.455219   2.994331   1.829989   2.697478   2.337985   2.406673   2.744097   2.458048   2.784674   2.376417   2.278140
+ENST00000494149    2.295476   2.741257   2.523092   2.859111   2.508424   2.864593   2.731900   2.672022   2.715130   2.420961   2.545510   2.612718   2.468350
+ENST00000466557    1.419133   1.629145   1.414306   1.492456   1.316899   1.606532   1.592708   1.323524   1.541619   1.355657   1.356693   1.565070   1.697627
+ENST00000410691    1.021071   2.028927   1.205358   1.021071   1.853993   1.021071   1.021071   1.401482   1.021071   1.021071   1.021071   1.021071   1.712814
+ENST00000491962    1.607203   1.587833   1.429779   1.307395   1.316502   1.786766   1.306864   1.390924   1.021071   1.023735   1.449315   1.513533   1.597216
+ENST00000623083    2.755694   2.855784   2.923368   3.147994   2.825012   2.965289   2.460539   2.852366   3.163416   2.910949   3.137193   2.859305   2.914980
+
+```r
+head(log2(dge.norm$counts + 0.25)) %>% kable() # reasonably similar to the result obtained with cpm function, which uses prior.count = 0.25 as default
+```
+
+                       A54974      A54963       A54964       A54966       A35856       A54971       A54972       A54973      A54967       A54969       A54968       A54965      A54970
+----------------  -----------  ----------  -----------  -----------  -----------  -----------  -----------  -----------  ----------  -----------  -----------  -----------  ----------
+ENST00000488147     1.6417037   2.1207613    1.8711513    2.6091888    0.8016843    2.2163822    1.6931470    1.8000720    2.279069    1.8751820    2.3323115    1.7537252   1.5992997
+ENST00000494149     1.6293347   2.2734246    1.9704366    2.4327387    1.9380641    2.4417971    2.2625652    2.1826224    2.239511    1.8200409    1.9999091    2.0991168   1.8889205
+ENST00000466557    -0.1733942   0.3755466   -0.1887477    0.0323590   -0.5105578    0.3243452    0.2901059   -0.4790377    0.162473   -0.3722942   -0.3708644    0.2234448   0.5326062
+ENST00000410691    -2.0000000   1.1824953   -0.9356303   -2.0000000    0.8492011   -2.0000000   -2.0000000   -0.2265285   -2.000000   -2.0000000   -2.0000000   -2.0000000   0.5659529
+ENST00000491962     0.3270573   0.2766348   -0.1428598   -0.5375351   -0.5119355    0.7240905   -0.5388906   -0.2589999   -2.000000   -1.9788046   -0.0885032    0.0908819   0.3005795
+ENST00000623083     2.2972604   2.4272165    2.5191035    2.8040521    2.3779930    2.5735219    1.8779472    2.4270284    2.823992    2.5027127    2.7894962    2.4355985   2.5064915
+
+
+## Perform linear modeling and statistics
+
+```r
+myfit <- lmFit(dge.log, design = designMatrix)
+myfitEb <- eBayes(myfit, trend = TRUE) # trend analysis for RNA-seq data
+
+
+# make contrast table for desired comparisons (each vs. ctrl)
+myContrasts <- makeContrasts(m143_vs_ctrl = SPG_targetmiR143 - Intercept,
+                             mX_vs_ctrl = SPG_targetmiRX - Intercept,
+                             both_vs_ctrl = SPG_targetboth - Intercept,
+                             none_vs_ctrl = SPG_targetnone - Intercept, levels = designMatrix)
 ```
 
 ```
-## [1] "Intercept"         "SPG_targetboth"    "SPG_targetctrl"   
-## [4] "SPG_targetmiR.143" "SPG_targetmiR.X"   "SPG_targetnone"
+## Warning in makeContrasts(m143_vs_ctrl = SPG_targetmiR143 - Intercept,
+## mX_vs_ctrl = SPG_targetmiRX - : Renaming (Intercept) to Intercept
 ```
 
 ```r
-result.pair <- results(res, contrast = c("SPG_target", "miR.143", "ctrl")) # contrast: the factor, then numerator, then denominator
-
-kable(head(result.pair[which(result.pair$padj < 0.05),]))
+# re-fit model with contrasts
+contfit <- contrasts.fit(myfit, myContrasts) # I double checked and the names do match; the STAT540 seminar-4 tutorial also threw the same error message
 ```
 
-                    baseMean   log2FoldChange       lfcSE        stat      pvalue        padj
-----------------  ----------  ---------------  ----------  ----------  ----------  ----------
-ENST00000379389     55.22855       -0.7644179   0.2442903   -3.129138   0.0017532   0.0352541
-ENST00000444870     62.84878        0.7377248   0.2298670    3.209355   0.0013303   0.0288697
-ENST00000376957    340.94471       -0.6291736   0.1478924   -4.254267   0.0000210   0.0013527
-ENST00000616661     15.11767        2.3364114   0.5409216    4.319316   0.0000157   0.0010936
-ENST00000375980     20.25668        1.2880441   0.3731420    3.451888   0.0005567   0.0154782
-ENST00000375254     26.61497        1.4333930   0.3251651    4.408201   0.0000104   0.0007816
+```
+## Warning in contrasts.fit(myfit, myContrasts): row names of contrasts don't
+## match col names of coefficients
+```
 
 ```r
-write.csv(x = result.pair, file = "./Kate/DEseq/miR143_vs_ctrl.csv")
+contfitEb <- eBayes(contfit, trend = TRUE)
+
+contResult <- topTable(contfitEb, number = Inf)
+
+head(contResult) %>% kable()
 ```
 
+                   m143_vs_ctrl   mX_vs_ctrl   both_vs_ctrl   none_vs_ctrl    AveExpr           F   P.Value   adj.P.Val
+----------------  -------------  -----------  -------------  -------------  ---------  ----------  --------  ----------
+ENST00000331825       -11.58455    -11.74639      -11.82715      -11.66583   11.54512   1075.5160         0           0
+ENST00000368567       -11.90180    -11.97577      -11.72540      -11.62028   11.78790    806.5492         0           0
+ENST00000321358       -10.45635    -10.43227      -10.79253      -10.88001   10.30096    721.4833         0           0
+ENST00000270625       -12.11507    -12.13359      -12.23357      -12.14950   11.74703    675.0391         0           0
+ENST00000368097       -10.23678    -10.33616      -10.40477      -10.55863   10.19027    619.5894         0           0
+ENST00000361335       -13.89967    -13.88180      -14.21951      -14.19801   13.22285    617.7511         0           0
+
+### QC: p-value histogram
 
 ```r
-# cutoffs: padj < 0.05, |FC| > 2
-dat <- read.csv("./Kate/DEseq/miR143_vs_ctrl.csv") %>%
-  mutate(Signif_p = -log10(padj) > -log10(0.05), 
-         Signif_delta = abs(log2FoldChange) > log2(2),
-         Signif = Signif_p == TRUE & Signif_delta == TRUE)
-
-ggplot(dat, aes(log2FoldChange, -log10(padj))) +
-  geom_point(aes(colour = Signif))
+hist(contResult$P.Value)
 ```
 
-```
-## Warning: Removed 40474 rows containing missing values (geom_point).
-```
+![](expression_analysis_Kate_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
-![](expression_analysis_Kate_files/figure-html/miR143_volcano-1.png)<!-- -->
+> NOTE: Too many low p-values???
 
 
-
-#### miR-X vs ctrl  
+## Identify differentially expressed genes in contrasts
 
 ```r
-result.pair <- results(res, contrast = c("SPG_target", "miR.X", "ctrl")) # contrast: the factor, then numerator, then denominator
+testResults <- decideTests(contfitEb, p.value = 1e-4, p.adjust.methods = "fdr", method = "global")
 
-kable(head(result.pair[which(result.pair$padj < 0.05),]))
-```
-
-                     baseMean   log2FoldChange       lfcSE        stat      pvalue        padj
-----------------  -----------  ---------------  ----------  ----------  ----------  ----------
-ENST00000376957    340.944708       -0.6402111   0.1485135   -4.310795   0.0000163   0.0059842
-ENST00000616661     15.117668        2.1413970   0.5440533    3.936006   0.0000828   0.0215420
-ENST00000375254     26.614972        1.6091151   0.3238537    4.968649   0.0000007   0.0004853
-ENST00000270792    585.158377        0.4779725   0.1305273    3.661858   0.0002504   0.0468939
-ENST00000319041    602.213305        0.6097597   0.1181528    5.160773   0.0000002   0.0002143
-ENST00000524432      4.271692        2.9579488   0.6938009    4.263397   0.0000201   0.0070417
-
-```r
-write.csv(x = result.pair, file = "./Kate/DEseq/miRX_vs_ctrl.csv")
-```
-
-
-```r
-# cutoffs: padj < 0.05, |FC| > 2
-dat <- read.csv("./Kate/DEseq/miRX_vs_ctrl.csv") %>%
-  mutate(Signif_p = -log10(padj) > -log10(0.05), 
-         Signif_delta = abs(log2FoldChange) > log2(2),
-         Signif = Signif_p == TRUE & Signif_delta == TRUE)
-
-ggplot(dat, aes(log2FoldChange, -log10(padj))) +
-  geom_point(aes(colour = Signif))
+summary(testResults)
 ```
 
 ```
-## Warning: Removed 34 rows containing missing values (geom_point).
+##        m143_vs_ctrl mX_vs_ctrl both_vs_ctrl none_vs_ctrl
+## Down          28191      27280        28354        22364
+## NotSig        21506      22417        21343        27333
+## Up                0          0            0            0
 ```
 
-![](expression_analysis_Kate_files/figure-html/miRX_volcano-1.png)<!-- -->
+> NOTE: A lot of genes are massively downregulated... there must be something wrong!
 
 
-#### Both vs ctrl  
-
-```r
-result.pair <- results(res, contrast = c("SPG_target", "both", "ctrl")) # contrast: the factor, then numerator, then denominator
-
-kable(head(result.pair, 20)) # all p-values = 1, why??? Maybe the SPG didn't work to knock anything down? Maybe there was an outlier sample? ASK
-```
-
-                       baseMean   log2FoldChange       lfcSE         stat      pvalue   padj
-----------------  -------------  ---------------  ----------  -----------  ----------  -----
-ENST00000488147       3.4868792        0.5136559   0.6102379    0.8417307   0.3999387      1
-ENST00000494149       4.0626438       -0.0091215   0.5994983   -0.0152151   0.9878605      1
-ENST00000466557       0.8405221       -0.0066929   0.6952683   -0.0096264   0.9923194      1
-ENST00000410691       0.4510725       -0.1732745   0.4121223   -0.4204443   0.6741609      1
-ENST00000491962       0.6139997       -0.4409177   0.6390736   -0.6899326   0.4902365      1
-ENST00000623083       5.3203599        0.3827929   0.5493490    0.6968118   0.4859206      1
-ENST00000624735       1.6528961       -0.1457201   0.6916280   -0.2106915   0.8331280      1
-ENST00000514436       0.7916598        0.3330299   0.6852433    0.4860024   0.6269655      1
-ENST00000599771      12.8038757        0.1269599   0.3938008    0.3223964   0.7471524      1
-ENST00000608420       1.4547964        0.3160217   0.7010694    0.4507710   0.6521546      1
-ENST00000416931      68.6498706       -0.2607242   0.3023243   -0.8623990   0.3884680      1
-ENST00000457540      98.9015427       -0.0501268   0.1920370   -0.2610269   0.7940718      1
-ENST00000617238     291.3738525        0.2602736   0.3245026    0.8020694   0.4225128      1
-ENST00000414273       7.6331097        0.1343469   0.4916868    0.2732367   0.7846712      1
-ENST00000427426       4.0150084        0.1429441   0.5863173    0.2437999   0.8073858      1
-ENST00000467115       1.8034461       -0.1894991   0.7034768   -0.2693750   0.7876411      1
-ENST00000514057    1857.8623074        0.2281347   0.1282874    1.7783096   0.0753530      1
-ENST00000416718       5.2267240        0.2195864   0.5387352    0.4075962   0.6835702      1
-ENST00000506640       2.4797294        0.2056814   0.6520455    0.3154402   0.7524274      1
-ENST00000411249       0.2440876        0.0000000   0.3976885    0.0000000   1.0000000      1
-
-```r
-write.csv(x = result.pair, file = "./Kate/DEseq/originalSPG_vs_ctrl.csv")
-```
-
-
-```r
-# cutoffs: padj < 0.05, |FC| > 2
-dat <- read.csv("./Kate/DEseq/originalSPG_vs_ctrl.csv") %>%
-  mutate(Signif_p = -log10(padj) > -log10(0.05), 
-         Signif_delta = abs(log2FoldChange) > log2(2),
-         Signif = Signif_p == TRUE & Signif_delta == TRUE)
-
-ggplot(dat, aes(log2FoldChange, -log10(padj))) +
-  geom_point(aes(colour = Signif))
-```
-
-```
-## Warning: Removed 34 rows containing missing values (geom_point).
-```
-
-![](expression_analysis_Kate_files/figure-html/orig_spg_volcano-1.png)<!-- -->
 
